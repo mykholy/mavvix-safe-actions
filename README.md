@@ -27,6 +27,7 @@ The ticket can be used successfully only once. A failure aborts the transaction 
 | Pivot-row identities and duplicate relationship rows | Refused |
 | Non-Eloquent data sources | Refused |
 | Multi-database transactions | Refused |
+| MySQL 8.4 / PostgreSQL 16 functional CI | Tested (parallel concurrency testing outstanding) |
 
 Selections are capped at **500 records** by default. Larger selections fail closed; this package does not silently truncate execution.
 
@@ -115,7 +116,7 @@ The third argument to PreflightStore::issue() binds the ticket to a query finger
 - Serializes uses of the same ticket and locks the selected rows within a transaction where supported by the database.
 - Rolls back database changes when a callback fails before commit. It **cannot** roll back external APIs, sent messages, dispatched jobs or mutations on another database connection.
 - Cannot guarantee a field-level immutable diff, full protection against all cross-process races, or rollback after a successful commit.
-- Rejects unsupported pivots and unbounded selections. SQLite tests cannot substitute for parallel MySQL/PostgreSQL transaction tests.
+- Rejects unsupported pivots and unbounded selections. Functional tests pass on MySQL and PostgreSQL; parallel multi-session concurrency tests are still required.
 - Still requires security review, real-driver concurrency tests, browser coverage and a supported-version matrix before v1.0.0.
 
 Callbacks must be short-running, synchronous and database-only. Do not perform irreversible work from the mutation callback. Use an outbox and a separate worker if you need external effects.
