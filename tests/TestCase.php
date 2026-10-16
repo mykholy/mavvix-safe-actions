@@ -36,6 +36,8 @@ abstract class TestCase extends OrchestraTestCase
 
     protected function defineDatabaseMigrations(): void
     {
+        (require __DIR__.'/../database/migrations/2026_10_17_000000_create_safe_action_preflights_table.php')->up();
+
         Schema::create('probe_orders', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('tenant_id');

@@ -41,6 +41,6 @@ final class SelectionInspector
             }
         }
 
-        return new SelectionInspection($requested->count(), $requested->digest());
+        return new SelectionInspection($requested->count(), $requested->digest(), $requested->keys);
     }
 }

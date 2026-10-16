@@ -18,5 +18,9 @@ final class SafeActionsServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../config/safe-actions.php' => config_path('safe-actions.php'),
         ], 'safe-actions-config');
+
+        $this->publishes([
+            __DIR__.'/../database/migrations' => database_path('migrations'),
+        ], 'safe-actions-migrations');
     }
 }

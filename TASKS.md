@@ -14,7 +14,8 @@
 
 ## PR-01 onward
 
-- [ ] Persistent preflight, actor/tenant binding and expiry
+- [x] Read-only persisted preflight snapshot with actor/tenant/action binding and expiry (CI pending)
+- [ ] One-time consumption and execution-time scope/permission revalidation
 - [ ] Action modal with read-only preview
 - [ ] Atomic bounded mutation and revalidation
 - [ ] Concurrency, duplicate-submission and failure-mode tests

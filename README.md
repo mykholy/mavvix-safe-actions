@@ -16,7 +16,7 @@ This first engineering increment includes:
 - Regression fixtures for filtered-out, unauthorized, missing and cross-tenant records.
 - PHP 8.3 / Laravel 12 and PHP 8.4 / Laravel 13 CI coverage, including native Filament Livewire tests for filters, tenant scope, selectable rows and bounded all-matching.
 
-**It does not yet integrate into Filament action modals, save preflight snapshots, confirm or execute bulk mutations.** Do not use its result as an authorization token or as a guarantee against concurrent changes. The caller is responsible for constructing the correct scoped Eloquent query and invoking actual Laravel policies in their callback.
+**It does not yet integrate into Filament action modals or confirm or execute bulk mutations.** Do not use its result as an authorization token or as a guarantee against concurrent changes. The caller is responsible for constructing the correct scoped Eloquent query and invoking actual Laravel policies in their callback.
 
 ## Development setup
 
@@ -60,6 +60,17 @@ $inspection = app(\Mavvix\SafeActions\Selection\FilamentSelectionInspector::clas
 ```
 
 Only call this from a Livewire component whose table query already scopes the actor's tenant. This adapter **does not** bind its result to an actor, make a transaction, or authorize a future mutation. No action execution API is shipped.
+
+## Persisted preflight snapshots (experimental)
+
+The package now has a publishable migration for `safe_action_preflights`. These snapshots hold the canonical record keys, digest, actor, tenant, panel and action context and expire after five minutes by default. They contain no model objects or executable callbacks.
+
+```bash
+php artisan vendor:publish --tag=safe-actions-migrations
+php artisan migrate
+```
+
+Use `PreflightStore::issue()` only with an inspected selection, and construct `PreflightContext` from the **authenticated server context**, never request input. `PreflightStore::read()` checks the ticket's actor, tenant, panel, action and expiry, but still does **not** authorize any mutation. The eventual executor must re-resolve the target scope under a transaction and re-run all policies before changing data.
 
 ## Roadmap
 
