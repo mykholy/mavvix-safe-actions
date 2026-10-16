@@ -19,6 +19,17 @@ use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 abstract class TestCase extends OrchestraTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $driver = getenv('SAFE_ACTIONS_EXPECTED_DRIVER');
+
+        if (is_string($driver) && $driver !== '') {
+            self::assertSame($driver, Schema::getConnection()->getDriverName());
+        }
+    }
+
     protected function getPackageProviders($app): array
     {
         return [
