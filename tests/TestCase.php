@@ -8,6 +8,7 @@ use Filament\Actions\ActionsServiceProvider;
 use Filament\FilamentServiceProvider;
 use Filament\Schemas\SchemasServiceProvider;
 use Filament\Tables\TablesServiceProvider;
+use Filament\Support\SupportServiceProvider;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Mavvix\SafeActions\SafeActionsServiceProvider;
@@ -22,6 +23,7 @@ abstract class TestCase extends OrchestraTestCase
             SafeActionsServiceProvider::class,
             LivewireServiceProvider::class,
             FilamentServiceProvider::class,
+            SupportServiceProvider::class,
             ActionsServiceProvider::class,
             SchemasServiceProvider::class,
             TablesServiceProvider::class,
