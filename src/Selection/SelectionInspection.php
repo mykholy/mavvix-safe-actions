@@ -9,6 +9,5 @@ final readonly class SelectionInspection
     public function __construct(
         public int $recordCount,
         public string $selectionDigest,
-    ) {
-    }
+    ) {}
 }

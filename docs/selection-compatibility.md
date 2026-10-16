@@ -1,6 +1,6 @@
 # Filament 5 selection compatibility — discovery log
 
-Status: **PR-00 in progress. Not yet validated in a host Filament app.**
+Status: **PR-00 in progress. Host Filament tests are authored; CI confirmation pending.**
 
 ## Verified public APIs in Filament 5 documentation
 

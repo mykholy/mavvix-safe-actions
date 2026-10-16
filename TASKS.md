@@ -7,7 +7,7 @@
 - [x] Add CI test matrix configuration
 - [x] Document limitations and public Filament APIs
 - [ ] Install dependencies and obtain passing CI evidence
-- [ ] Build an actual Filament v5 Livewire selection harness
+- [x] Author a Filament v5 Livewire selection harness (pending CI verification)
 - [ ] Confirm filtered/all-matching selection behavior experimentally
 - [ ] Obtain an independently reviewable selection adapter contract
 

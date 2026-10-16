@@ -36,7 +36,7 @@ final class SelectionInspector
         }
 
         foreach ($records as $record) {
-            if (! $mayAct($record)) {
+            if (!$mayAct($record)) {
                 throw UnsafeSelection::unauthorized();
             }
         }
