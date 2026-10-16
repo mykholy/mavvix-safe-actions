@@ -41,3 +41,84 @@ jobs:
         run: |
           vendor/bin/pint
           git --no-pager diff -- src tests
+
+  mysql:
+    name: MySQL 8 / Laravel 12
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: safe_actions_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: safe_actions_test
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      SAFE_ACTIONS_EXPECTED_DRIVER: mysql
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, pdo_mysql, dom, xml, zip
+          tools: composer:v2
+          coverage: none
+      - name: Install dependencies
+        run: |
+          composer require --no-interaction --no-update --dev "laravel/framework:^12.0" "orchestra/testbench:^10.0"
+          composer update --prefer-dist --no-interaction --no-progress --with-all-dependencies
+      - name: Run MySQL tests
+        run: vendor/bin/phpunit
+
+  postgres:
+    name: PostgreSQL 16 / Laravel 12
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: safe_actions_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d safe_actions_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: safe_actions_test
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      SAFE_ACTIONS_EXPECTED_DRIVER: pgsql
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, pdo_pgsql, dom, xml, zip
+          tools: composer:v2
+          coverage: none
+      - name: Install dependencies
+        run: |
+          composer require --no-interaction --no-update --dev "laravel/framework:^12.0" "orchestra/testbench:^10.0"
+          composer update --prefer-dist --no-interaction --no-progress --with-all-dependencies
+      - name: Run PostgreSQL tests
+        run: vendor/bin/phpunit
