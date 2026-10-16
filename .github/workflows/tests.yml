@@ -32,6 +32,6 @@ jobs:
           composer require --no-interaction --no-update --dev "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}"
           composer update --prefer-dist --no-interaction --no-progress --with-all-dependencies
       - name: Run tests
-        run: vendor/bin/phpunit --debug
+        run: vendor/bin/phpunit
       - name: Verify formatting
         run: vendor/bin/pint --test

@@ -97,6 +97,43 @@ final class FilamentGuardedSelectionTest extends TestCase
             ->assertSet('inspectionError', 'The selection exceeds the configured safe limit.');
     }
 
+    public function test_current_page_only_rejects_a_key_from_another_page(): void
+    {
+        $orders = collect(range(1, 20))->map(fn (): ProbeOrder => ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']));
+        $last = $orders->last();
+
+        Livewire::test(GuardedOrdersTable::class)
+            ->set('currentPageOnly', true)
+            ->set('selectedTableRecords', [$last->getKey()])
+            ->call('inspectSelection')
+            ->assertSet('inspectedCount', null)
+            ->assertSet('inspectionError', 'Some selected records are not available within the permitted scope.');
+    }
+
+    public function test_current_page_only_rejects_inverse_selection(): void
+    {
+        ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+
+        Livewire::test(GuardedOrdersTable::class)
+            ->set('currentPageOnly', true)
+            ->set('isTrackingDeselectedTableRecords', true)
+            ->call('inspectSelection')
+            ->assertSet('inspectedCount', null)
+            ->assertSet('inspectionError', 'This Filament selection mode is not supported safely.');
+    }
+
+    public function test_inverse_selection_rejects_noncanonical_deselected_keys(): void
+    {
+        ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+
+        Livewire::test(GuardedOrdersTable::class)
+            ->set('isTrackingDeselectedTableRecords', true)
+            ->set('deselectedTableRecords', ['0001'])
+            ->call('inspectSelection')
+            ->assertSet('inspectedCount', null)
+            ->assertSet('inspectionError', 'The selection contains invalid or duplicate record keys.');
+    }
+
     public function test_all_matching_revalidates_policy_for_each_record(): void
     {
         ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);

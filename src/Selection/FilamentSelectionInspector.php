@@ -81,18 +81,15 @@ final class FilamentSelectionInspector
 
         // A bounded scan prevents inverse selection from unexpectedly enumerating
         // the entire table. A future streaming resolver will handle larger sets.
-        $excluded = [];
+        $excludedKeys = $livewire->deselectedTableRecords === []
+            ? []
+            : ExplicitKeys::forModel($scope->getModel(), $livewire->deselectedTableRecords, $limit)->keys;
 
-        foreach ($livewire->deselectedTableRecords as $key) {
-            if (! is_string($key) && ! is_int($key)) {
-                throw UnsafeSelection::invalid();
-            }
+        $excluded = array_fill_keys($excludedKeys, true);
 
-            $excluded[(string) $key] = true;
-        }
-
-        if (count($excluded) !== count($livewire->deselectedTableRecords)) {
-            throw UnsafeSelection::invalid();
+        // A caller-defined offset or limit would silently change what "all" means.
+        if ($scope->getQuery()->offset !== null || $scope->getQuery()->limit !== null) {
+            throw UnsafeSelection::unsupported();
         }
 
         $records = (clone $scope)->limit($limit + 1)->get();

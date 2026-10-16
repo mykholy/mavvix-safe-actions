@@ -26,6 +26,8 @@ final class GuardedOrdersTable extends Component implements HasActions, HasSchem
     use InteractsWithSchemas;
     use InteractsWithTable;
 
+    public bool $currentPageOnly = false;
+
     public ?int $inspectedCount = null;
 
     public ?string $inspectionError = null;
@@ -35,6 +37,7 @@ final class GuardedOrdersTable extends Component implements HasActions, HasSchem
         return $table
             ->query(ProbeOrder::query()->where('tenant_id', 1))
             ->columns([TextColumn::make('status')])
+            ->selectCurrentPageOnly($this->currentPageOnly)
             ->filters([
                 Filter::make('pending')->query(fn (Builder $query): Builder => $query->where('status', 'pending')),
             ])
