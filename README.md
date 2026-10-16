@@ -1,85 +1,129 @@
 # Mavvix Safe Actions
 
-**Guarded selections for consequential Filament bulk actions.**
+**Fail-closed bulk changes for Filament 5.** Resolve the exact selection, preview its size, revalidate at confirmation, and mutate records within a single database transaction.
 
-> **Development preview — not ready for production use.** No stable release or Packagist publication yet.
+> **Pre-alpha.** Development branch only. No Packagist publication or stable tag yet; production use is not recommended.
 
-A selected checkbox is not an authorization decision. Mavvix Safe Actions is being built to help Filament teams validate the *exact* set of records affected by a bulk operation before it changes production data.
+## How it works
 
-## Current status
+1. Evaluate the current Filament table selection against the live filtered and tenant-scoped Eloquent query.
+2. Reject missing, stale, out-of-scope, unselectable or unauthorized records.
+3. Persist an expiring ticket bound to the actor, guard, tenant, panel, action and query fingerprint.
+4. Show the verified record count in a native Filament confirmation modal.
+5. Re-resolve and lock the selected records, check policies again, perform a single-database transaction, and consume the ticket.
 
-This first engineering increment includes:
+The ticket can be used successfully only once. A failure aborts the transaction without consuming it.
 
-- A Laravel auto-discovered package and publishable configuration.
-- `SelectionInspector` for explicit IDs, plus a bounded `FilamentSelectionInspector` adapter using the live filtered table query.
-- Strict, bounded primary-key validation; exact set comparison; per-record eligibility callbacks.
-- Regression fixtures for filtered-out, unauthorized, missing and cross-tenant records.
-- PHP 8.3 / Laravel 12 and PHP 8.4 / Laravel 13 CI coverage, including native Filament Livewire tests for filters, tenant scope, selectable rows and bounded all-matching.
+## Compatibility
 
-**It does not yet integrate into Filament action modals or confirm or execute bulk mutations.** Do not use its result as an authorization token or as a guarantee against concurrent changes. The caller is responsible for constructing the correct scoped Eloquent query and invoking actual Laravel policies in their callback.
+| Runtime / mode | Status |
+| --- | --- |
+| Filament 5 + Laravel 12 / PHP 8.3 | CI tested |
+| Filament 5 + Laravel 13 / PHP 8.4 | CI tested |
+| Laravel 11 | Not yet validated against secure framework versions |
+| Filament 3 / 4 | Not supported |
+| Eloquent tables with single-column primary keys | Supported |
+| Filtered, current-page and bounded all-matching selections | Livewire tests |
+| Pivot-row identities and duplicate relationship rows | Refused |
+| Non-Eloquent data sources | Refused |
+| Multi-database transactions | Refused |
 
-## Development setup
+Selections are capped at **500 records** by default. Larger selections fail closed; this package does not silently truncate execution.
 
-The implementation currently lives in a draft pull request, not on `main`. To inspect and test the code:
+## Install for development
 
-```bash
-git clone https://github.com/mykholy/mavvix-safe-actions.git
-cd mavvix-safe-actions
-git switch feat/pr00-selection-foundation
-composer install
-vendor/bin/phpunit
-vendor/bin/pint --test
-```
+Packagist publication is not available yet. In a disposable Filament 5 application:
 
-Do not install `dev-main` as an application dependency yet: the repository has no published package release or production-ready action API. This branch is for development and review only.
-
-## Selection inspector (internal integration API, subject to change)
-
-```php
-use Illuminate\Database\Eloquent\Model;
-use Mavvix\SafeActions\Selection\SelectionInspector;
-
-$inspection = app(SelectionInspector::class)->inspect(
-    Order::query()->where('tenant_id', $tenant->getKey())->where('status', 'pending'),
-    [42, 43],
-    fn (Model $order): bool => Gate::forUser($user)->allows('update', $order),
-);
-
-// $inspection->recordCount === 2
-```
-
-The headless inspector needs a trusted caller-supplied query and key list. The Filament adapter reads its current Livewire selection but must only be used for inspection, never as an execution authorization. Inspecting never calls model writes, but your own authorization callback must also be read-only. No action should mutate based on this inspection alone: scope, tenant, actor and policies must be revalidated inside the eventual execution boundary.
-
-## Filament integration (read-only)
-
-The `FilamentSelectionInspector` takes an actual Livewire component implementing `HasTable`. It inspects explicitly selected rows and **bounded** all-matching inverse selections using Filament's filtered query, the row-selectability closure and your authorization callback. A strict limit (500 by default) prevents unbounded inverse scans. It fails closed for pivot-row identities, non-Eloquent data sources and unsupported modes.
-
-```php
-$inspection = app(\Mavvix\SafeActions\Selection\FilamentSelectionInspector::class)
-    ->inspect($this, fn (Model $record): bool => Gate::allows('update', $record));
-```
-
-Only call this from a Livewire component whose table query already scopes the actor's tenant. This adapter **does not** bind its result to an actor, make a transaction, or authorize a future mutation. No action execution API is shipped.
-
-## Persisted preflight snapshots (experimental)
-
-The package now has a publishable migration for `safe_action_preflights`. These snapshots hold the canonical record keys, digest, actor, tenant, panel and action context and expire after five minutes by default. They contain no model objects or executable callbacks.
-
-```bash
+~~~bash
+composer config repositories.mavvix vcs https://github.com/mykholy/mavvix-safe-actions
+composer require "mykholy/mavvix-safe-actions:dev-feat/pr00-selection-foundation"
 php artisan vendor:publish --tag=safe-actions-migrations
 php artisan migrate
-```
+~~~
 
-Use `PreflightStore::issue()` only with an inspected selection, and construct `PreflightContext` from the **authenticated server context**, never request input. `PreflightStore::read()` checks the ticket's actor, tenant, panel, action and expiry, but still does **not** authorize any mutation. The eventual executor must re-resolve the target scope under a transaction and re-run all policies before changing data.
+Run package tests on the development branch with composer install, vendor/bin/phpunit and vendor/bin/pint --test.
 
-## Roadmap
+## Native Filament action
 
-See [implementation plan](IMPLEMENTATION_PLAN.md), [task board](TASKS.md) and [selection compatibility](docs/selection-compatibility.md). We will test the real Filament v5 selection modes before providing a public `SafeBulkAction` facade.
+The action is opt-in. The developer supplies trusted request context, record authorization and a database-only mutation callback.
 
-## Security
+~~~php
+use Filament\Facades\Filament;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
+use Mavvix\SafeActions\Filament\SafeBulkAction;
+use Mavvix\SafeActions\Preflight\PreflightContext;
 
-Please do not assume preflight results guarantee safe execution. If you discover a vulnerability or scope-bypass problem, open a private GitHub security advisory when available rather than posting exploitation details in a public issue.
+public function table(Table $table): Table
+{
+    return $table
+        ->query(Order::query()->where('tenant_id', $this->tenant->getKey()))
+        ->toolbarActions([
+            SafeBulkAction::make(
+                name: 'archive',
+                context: function (HasTable $livewire): PreflightContext {
+                    $actor = Filament::auth()->user();
+                    $tenant = Filament::getTenant();
 
-## License
+                    return new PreflightContext(
+                        actorType: $actor->getMorphClass(),
+                        actorId: (string) $actor->getAuthIdentifier(),
+                        guard: Filament::getCurrentPanel()->getAuthGuard(),
+                        actionKey: 'archive',
+                        tenantType: $tenant?->getMorphClass(),
+                        tenantId: $tenant ? (string) $tenant->getKey() : null,
+                        panelId: Filament::getCurrentPanel()->getId(),
+                    );
+                },
+                authorize: fn (Model $record): bool => Gate::allows('update', $record),
+                mutate: function (Model $record): void {
+                    $record->status = 'archived';
+                    $record->save();
+                },
+            ),
+        ]);
+}
+~~~
 
-MIT. See [LICENSE](LICENSE).
+Resolve the actor, guard, tenant and action key on the **server**. Never derive them from request input. The caller must enforce tenant boundaries in the table query, even when the Filament panel itself is tenant-aware.
+
+The native action previews a **record count**, not a complete before/after data diff. It checks both the caller-supplied policy callback and the Filament row-selectability rule at confirmation.
+
+## Headless API
+
+~~~php
+$scope = Order::query()->where('tenant_id', $tenant->getKey());
+
+$inspection = app(\Mavvix\SafeActions\Selection\SelectionInspector::class)
+    ->inspect($scope, $selectedIds, $authorize);
+
+$ticket = app(\Mavvix\SafeActions\Preflight\PreflightStore::class)
+    ->issue($inspection, $trustedContext, $scope);
+
+// In a later authenticated confirmation request, reconstruct the scope:
+$result = app(\Mavvix\SafeActions\Execution\GuardedExecutor::class)
+    ->execute($ticket->id, $trustedContext, $freshScope, $authorize, $mutate);
+~~~
+
+The third argument to PreflightStore::issue() binds the ticket to a query fingerprint. Omitting it intentionally creates a **read-only ticket that cannot be executed**.
+
+## Guarantees and limitations
+
+- Revalidates selection identity, filtered query, actor/tenant context and per-record eligibility at execution.
+- Serializes uses of the same ticket and locks the selected rows within a transaction where supported by the database.
+- Rolls back database changes when a callback fails before commit. It **cannot** roll back external APIs, sent messages, dispatched jobs or mutations on another database connection.
+- Cannot guarantee a field-level immutable diff, full protection against all cross-process races, or rollback after a successful commit.
+- Rejects unsupported pivots and unbounded selections. SQLite tests cannot substitute for parallel MySQL/PostgreSQL transaction tests.
+- Still requires security review, real-driver concurrency tests, browser coverage and a supported-version matrix before v1.0.0.
+
+Callbacks must be short-running, synchronous and database-only. Do not perform irreversible work from the mutation callback. Use an outbox and a separate worker if you need external effects.
+
+## Documentation and development
+
+[Implementation plan](IMPLEMENTATION_PLAN.md) · [Task board](TASKS.md) · [Selection compatibility](docs/selection-compatibility.md) · [CI](.github/workflows/tests.yml)
+
+To report a vulnerability, use a private GitHub Security Advisory if available. Do not publish exploit details in a public issue.
+
+**License:** MIT — see [LICENSE](LICENSE).
