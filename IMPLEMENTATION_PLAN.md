@@ -1,9 +1,9 @@
 # Mavvix Safe Actions — Implementation Plan
 
-**Status:** Approved for engineering discovery, not yet implemented  
+**Status:** Pre-alpha implementation underway — selection adapter and read-only preflight storage complete; mutation execution not implemented  
 **Date:** 17 October 2026  
 **Product:** Free, open-source FilamentPHP plugin  
-**Proposed Composer package:** `mavvix/filament-safe-actions` (availability unverified)  
+**Composer package:** `mykholy/mavvix-safe-actions` (development branch; not published on Packagist)  
 **License:** MIT (planned)  
 **Primary stack:** Filament 5, PHP 8.2+, Laravel 11.28+/12/13 (respect each Laravel version's PHP constraints)
 
