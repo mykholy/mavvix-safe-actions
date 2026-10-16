@@ -23,6 +23,11 @@ final class UnsafeSelection extends RuntimeException
         return new self('Some selected records are not available within the permitted scope.');
     }
 
+    public static function unsupported(): self
+    {
+        return new self('This Filament selection mode is not supported safely.');
+    }
+
     public static function unauthorized(): self
     {
         return new self('One or more selected records are not authorized.');

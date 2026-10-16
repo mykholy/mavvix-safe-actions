@@ -8,7 +8,8 @@
 - [x] Document limitations and public Filament APIs
 - [x] Install dependencies and obtain passing CI evidence (Laravel 12 / PHP 8.3, Laravel 13 / PHP 8.4)
 - [x] Run the explicit-record Filament v5 Livewire selection harness in both CI environments
-- [ ] Confirm filtered/all-matching selection behavior experimentally
+- [x] Add bounded adapter and Livewire regression coverage for filtered/all-matching selections (CI pending)
+- [ ] Test current-page select-all, pivot identity, global-search and grouped selections
 - [ ] Obtain an independently reviewable selection adapter contract
 
 ## PR-01 onward

@@ -11,10 +11,10 @@ A selected checkbox is not an authorization decision. Mavvix Safe Actions is bei
 This first engineering increment includes:
 
 - A Laravel auto-discovered package and publishable configuration.
-- `SelectionInspector`, a read-only, fail-closed check for explicitly supplied record IDs.
+- `SelectionInspector` for explicit IDs, plus a bounded `FilamentSelectionInspector` adapter using the live filtered table query.
 - Strict, bounded primary-key validation; exact set comparison; per-record eligibility callbacks.
 - Regression fixtures for filtered-out, unauthorized, missing and cross-tenant records.
-- A passing PHP 8.3 / Laravel 12 and PHP 8.4 / Laravel 13 CI matrix, including a native Filament Livewire selection probe.
+- PHP 8.3 / Laravel 12 and PHP 8.4 / Laravel 13 CI coverage, including native Filament Livewire tests for filters, tenant scope, selectable rows and bounded all-matching.
 
 **It does not yet integrate into Filament action modals, save preflight snapshots, confirm or execute bulk mutations.** Do not use its result as an authorization token or as a guarantee against concurrent changes. The caller is responsible for constructing the correct scoped Eloquent query and invoking actual Laravel policies in their callback.
 
@@ -48,7 +48,18 @@ $inspection = app(SelectionInspector::class)->inspect(
 // $inspection->recordCount === 2
 ```
 
-Selection IDs **must** come from a trusted server-side representation, not arbitrary browser-submitted IDs. Inspecting never calls model writes, but your own authorization callback must also be read-only. No action should mutate based on this inspection alone: scope, tenant, actor and policies must be revalidated inside the eventual execution boundary.
+The headless inspector needs a trusted caller-supplied query and key list. The Filament adapter reads its current Livewire selection but must only be used for inspection, never as an execution authorization. Inspecting never calls model writes, but your own authorization callback must also be read-only. No action should mutate based on this inspection alone: scope, tenant, actor and policies must be revalidated inside the eventual execution boundary.
+
+## Filament integration (read-only)
+
+The `FilamentSelectionInspector` takes an actual Livewire component implementing `HasTable`. It inspects explicitly selected rows and **bounded** all-matching inverse selections using Filament's filtered query, the row-selectability closure and your authorization callback. A strict limit (500 by default) prevents unbounded inverse scans. It fails closed for pivot-row identities, non-Eloquent data sources and unsupported modes.
+
+```php
+$inspection = app(\Mavvix\SafeActions\Selection\FilamentSelectionInspector::class)
+    ->inspect($this, fn (Model $record): bool => Gate::allows('update', $record));
+```
+
+Only call this from a Livewire component whose table query already scopes the actor's tenant. This adapter **does not** bind its result to an actor, make a transaction, or authorize a future mutation. No action execution API is shipped.
 
 ## Roadmap
 

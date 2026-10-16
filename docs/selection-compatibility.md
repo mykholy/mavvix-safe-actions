@@ -1,6 +1,6 @@
 # Filament 5 selection compatibility — discovery log
 
-Status: **PR-00 in progress. Explicit-selection inspector and native Filament Livewire smoke tests pass in Laravel 12/13 CI.**
+Status: **PR-00 in progress. An explicit-ID inspector and a bounded Filament selection adapter are under integration testing in Laravel 12/13 CI.**
 
 ## Verified public APIs in Filament 5 documentation
 
@@ -22,10 +22,10 @@ GitHub issue filamentphp/filament#20050 described records excluded by `checkIfRe
 | Mode | Initial support claim | Test status |
 | --- | --- | --- |
 | Explicit key list with a host-supplied scoped Eloquent query | Headless inspector only | Package tests pass in Laravel 12/13 CI |
-| Filament manually checked rows | Not yet supported end-to-end | Manually checked rows reach a native bulk action in a Livewire smoke test; safe adapter still needed |
+| Filament manually checked rows | Inspection only | Livewire adapter validates filtered query and per-row checks |
 | Filament current-page select-all | Not yet supported end-to-end | Host Livewire test needed |
-| Filtered/select-all-matching | Not supported | Inverse selection adapter and integration tests needed |
-| Selection with row selectability closure | Not yet supported end-to-end | Must re-evaluate closure/eligibility server-side |
+| Filtered/select-all-matching | Inspection only, bounded to 500 matching rows | Inverse mode inspects filtered query; larger selections fail closed |
+| Selection with row selectability closure | Inspection only | Re-evaluates closure/eligibility server-side |
 | Cross-tenant selection | Inspector fails if host passes scoped query | Real panel-tenancy tests needed |
 
 ## Immediate engineering work
