@@ -20,6 +20,7 @@ use Livewire\Component;
 use Mavvix\SafeActions\Exceptions\UnsafeExecution;
 use Mavvix\SafeActions\Exceptions\UnsafeSelection;
 use Mavvix\SafeActions\Filament\FilamentSafeActionWorkflow;
+use Mavvix\SafeActions\Filament\SafeBulkAction;
 use Mavvix\SafeActions\Preflight\PreflightContext;
 use Mavvix\SafeActions\Selection\FilamentSelectionInspector;
 
@@ -46,6 +47,17 @@ final class GuardedOrdersTable extends Component implements HasActions, HasSchem
         return $table
             ->query(ProbeOrder::query()->where('tenant_id', 1))
             ->columns([TextColumn::make('status')])
+            ->toolbarActions([
+                SafeBulkAction::make(
+                    'safe_archive',
+                    fn (HasTable $livewire): PreflightContext => $this->actionContext(),
+                    fn (Model $record): bool => $record->status === 'pending',
+                    function (Model $record): void {
+                        $record->status = 'archived';
+                        $record->save();
+                    },
+                ),
+            ])
             ->selectCurrentPageOnly($this->currentPageOnly)
             ->filters([
                 Filter::make('pending')->query(fn (Builder $query): Builder => $query->where('status', 'pending')),
