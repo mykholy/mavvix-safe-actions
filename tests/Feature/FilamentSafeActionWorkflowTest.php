@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mavvix\SafeActions\Tests\Feature;
 
+use Illuminate\Support\Facades\View;
 use Livewire\Livewire;
 use Mavvix\SafeActions\Preflight\SafeActionPreflight;
 use Mavvix\SafeActions\Tests\Fixtures\GuardedOrdersTable;
@@ -12,6 +13,13 @@ use Mavvix\SafeActions\Tests\TestCase;
 
 final class FilamentSafeActionWorkflowTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        View::addNamespace('safe-actions-test', __DIR__.'/../Fixtures/views');
+    }
+
     public function test_preview_and_confirmation_only_archive_selected_tenant_records(): void
     {
         $own = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
