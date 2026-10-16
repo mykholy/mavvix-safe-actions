@@ -16,7 +16,7 @@ use Mavvix\SafeActions\Selection\SelectionInspection;
  */
 final class PreflightStore
 {
-    public function __construct(private readonly ScopeFingerprint $fingerprint) {}
+    public function __construct(private readonly ?ScopeFingerprint $fingerprint = null) {}
 
     public function issue(
         SelectionInspection $inspection,
@@ -46,7 +46,7 @@ final class PreflightStore
             'record_keys' => $inspection->recordKeys,
             'record_count' => $inspection->recordCount,
             'selection_digest' => $inspection->selectionDigest,
-            'scope_digest' => $permittedScope === null ? null : $this->fingerprint->forQuery($permittedScope),
+            'scope_digest' => $permittedScope === null ? null : ($this->fingerprint ?? new ScopeFingerprint)->forQuery($permittedScope),
             'expires_at' => $expiresAt,
         ]);
 
