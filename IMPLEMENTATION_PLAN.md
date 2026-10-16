@@ -319,4 +319,4 @@ These are **release blockers**, not details left for the last PR:
 
 ---
 
-**Current project state:** Development code, tests, CI and documentation are present in the repository draft PR. This is not a security-reviewed stable release. Benchmarks, real-driver concurrency testing, independent review and publication remain incomplete.
+**Current project state:** Development code, tests, CI and documentation are present in the repository draft PR. This is not a security-reviewed stable release. Benchmarks, multi-session concurrency testing, independent review and publication remain incomplete. Functional tests are passing on SQLite, MySQL 8.4 and PostgreSQL 16.
