@@ -7,12 +7,12 @@ namespace Mavvix\SafeActions\Tests;
 use Filament\Actions\ActionsServiceProvider;
 use Filament\FilamentServiceProvider;
 use Filament\Schemas\SchemasServiceProvider;
-use Filament\Tables\TablesServiceProvider;
 use Filament\Support\SupportServiceProvider;
+use Filament\Tables\TablesServiceProvider;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Mavvix\SafeActions\SafeActionsServiceProvider;
 use Livewire\LivewireServiceProvider;
+use Mavvix\SafeActions\SafeActionsServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 abstract class TestCase extends OrchestraTestCase

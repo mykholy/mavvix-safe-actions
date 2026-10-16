@@ -11,9 +11,7 @@ use Mavvix\SafeActions\Exceptions\UnsafeSelection;
 final readonly class ExplicitKeys
 {
     /** @param list<string> $keys */
-    private function __construct(public array $keys)
-    {
-    }
+    private function __construct(public array $keys) {}
 
     /** @param array<array-key, mixed> $input */
     public static function forModel(Model $model, array $input, int $limit): self
@@ -31,7 +29,7 @@ final readonly class ExplicitKeys
         $integerKeys = $model->getKeyType() === 'int';
 
         foreach ($input as $key) {
-            if (!is_int($key) && !is_string($key)) {
+            if (! is_int($key) && ! is_string($key)) {
                 throw UnsafeSelection::invalid();
             }
 
@@ -41,13 +39,13 @@ final readonly class ExplicitKeys
                 throw UnsafeSelection::invalid();
             }
 
-            if ($integerKeys && (!preg_match('/^(0|[1-9][0-9]*)$/D', $value)
+            if ($integerKeys && (! preg_match('/^(0|[1-9][0-9]*)$/D', $value)
                 || (string) (int) $value !== $value)) {
                 throw UnsafeSelection::invalid();
             }
 
             // A string key must not collapse to a different database identity.
-            if (!$integerKeys && trim($value) !== $value) {
+            if (! $integerKeys && trim($value) !== $value) {
                 throw UnsafeSelection::invalid();
             }
 

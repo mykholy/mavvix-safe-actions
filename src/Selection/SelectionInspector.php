@@ -14,8 +14,8 @@ final class SelectionInspector
      * Inspects an explicit selection without modifying records. The caller must
      * supply the exact permitted query, including its filters and tenant scope.
      *
-     * @param array<array-key, mixed> $selectedKeys
-     * @param callable(Model): bool $mayAct
+     * @param  array<array-key, mixed>  $selectedKeys
+     * @param  callable(Model): bool  $mayAct
      */
     public function inspect(Builder $permittedScope, array $selectedKeys, callable $mayAct, int $limit = 500): SelectionInspection
     {
@@ -36,7 +36,7 @@ final class SelectionInspector
         }
 
         foreach ($records as $record) {
-            if (!$mayAct($record)) {
+            if (! $mayAct($record)) {
                 throw UnsafeSelection::unauthorized();
             }
         }
