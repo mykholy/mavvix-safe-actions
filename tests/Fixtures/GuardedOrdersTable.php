@@ -17,7 +17,10 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Component;
+use Mavvix\SafeActions\Exceptions\UnsafeExecution;
 use Mavvix\SafeActions\Exceptions\UnsafeSelection;
+use Mavvix\SafeActions\Filament\FilamentSafeActionWorkflow;
+use Mavvix\SafeActions\Preflight\PreflightContext;
 use Mavvix\SafeActions\Selection\FilamentSelectionInspector;
 
 final class GuardedOrdersTable extends Component implements HasActions, HasSchemas, HasTable
@@ -31,6 +34,12 @@ final class GuardedOrdersTable extends Component implements HasActions, HasSchem
     public ?int $inspectedCount = null;
 
     public ?string $inspectionError = null;
+
+    public ?string $safeTicketId = null;
+
+    public ?string $safeActionError = null;
+
+    public ?int $safeExecutedCount = null;
 
     public function table(Table $table): Table
     {
@@ -55,6 +64,53 @@ final class GuardedOrdersTable extends Component implements HasActions, HasSchem
                 ->recordCount;
         } catch (UnsafeSelection $exception) {
             $this->inspectionError = $exception->getMessage();
+        }
+    }
+
+
+    private function actionContext(): PreflightContext
+    {
+        return new PreflightContext('user', '42', 'web', 'archive', 'tenant', '1', 'admin');
+    }
+
+    public function previewSafeArchive(): void
+    {
+        $this->safeActionError = null;
+        $this->safeTicketId = null;
+
+        try {
+            $ticket = app(FilamentSafeActionWorkflow::class)->preview(
+                $this,
+                $this->actionContext(),
+                fn (Model $record): bool => $record->status === 'pending',
+            );
+
+            $this->safeTicketId = $ticket->id;
+        } catch (UnsafeSelection $exception) {
+            $this->safeActionError = $exception->getMessage();
+        }
+    }
+
+    public function executeSafeArchive(): void
+    {
+        $this->safeActionError = null;
+        $this->safeExecutedCount = null;
+
+        try {
+            $result = app(FilamentSafeActionWorkflow::class)->execute(
+                $this,
+                $this->safeTicketId ?? '',
+                $this->actionContext(),
+                fn (Model $record): bool => $record->status === 'pending',
+                function (Model $record): void {
+                    $record->status = 'archived';
+                    $record->save();
+                },
+            );
+
+            $this->safeExecutedCount = $result->affectedRecords;
+        } catch (UnsafeSelection | UnsafeExecution $exception) {
+            $this->safeActionError = $exception->getMessage();
         }
     }
 
