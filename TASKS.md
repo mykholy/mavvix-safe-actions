@@ -14,11 +14,14 @@
 
 ## PR-01 onward
 
-- [x] Read-only persisted preflight snapshot with actor/tenant/action binding and expiry (CI pending)
-- [ ] One-time consumption and execution-time scope/permission revalidation
-- [ ] Action modal with read-only preview
-- [ ] Atomic bounded mutation and revalidation
-- [ ] Concurrency, duplicate-submission and failure-mode tests
-- [ ] Driver test matrix, benchmarks, translation and release documentation
+- [x] Read-only persisted preflight snapshot with actor/tenant/action binding and expiry (CI tested)
+- [x] One-time consumption and execution-time scope/permission revalidation (CI tested)
+- [x] Native Filament action modal with verified record count (CI tested)
+- [ ] Field-by-field read-only impact diff
+- [x] Atomic bounded database mutation and revalidation (SQLite CI)
+- [x] Sequential duplicate-submission, stale-scope, revoked-policy and rollback tests
+- [ ] Two-session concurrency tests on MySQL and PostgreSQL
+- [ ] MySQL/PostgreSQL driver matrix, benchmarks and translated UI
+- [ ] Independent security review, accessibility/browser validation and release documentation
 
 **Release status: pre-alpha.** Do not tag v1.0.0 until all gates in `IMPLEMENTATION_PLAN.md` are satisfied.
