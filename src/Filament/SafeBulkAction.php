@@ -9,8 +9,8 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
-use Filament\Tables\Contracts\HasTable;
 use Filament\Support\Exceptions\Halt;
+use Filament\Tables\Contracts\HasTable;
 use Illuminate\Database\Eloquent\Model;
 use Mavvix\SafeActions\Exceptions\UnsafeExecution;
 use Mavvix\SafeActions\Exceptions\UnsafeSelection;
@@ -83,7 +83,7 @@ final class SafeBulkAction
                         $authorize,
                         $mutate,
                     );
-                } catch (UnsafeSelection | UnsafeExecution $exception) {
+                } catch (UnsafeSelection|UnsafeExecution $exception) {
                     Notification::make()
                         ->title('Safe action was not executed')
                         ->body($exception->getMessage())
