@@ -14,6 +14,7 @@ All noteworthy changes will be documented here. Until the first stable release, 
 - Transactional guarded executor with row revalidation, record locking where supported, and rollback on callback failure.
 - Native Filament bulk action with a confirmation modal and verified record count.
 - Livewire, Testbench, security regression, PHPUnit and Laravel Pint CI coverage.
+- MySQL 8.4 and PostgreSQL 16 functional test jobs in CI.
 
 ### Not yet complete
 
