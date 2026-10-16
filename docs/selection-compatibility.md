@@ -36,4 +36,4 @@ GitHub issue filamentphp/filament#20050 described records excluded by `checkIfRe
 4. Extend the existing inspector regression cases (828/842 and 101/18) with Filament selectability and filtered all-matching cases, UUID keys and permission changes.
 5. If exact target identity cannot be proven, disable that mode and display a clear unsupported-selection error.
 
-A preview-and-confirmation action is available on the development branch only. Do not publish a stable release until the remaining selection, browser, concurrency and security gates pass.
+A preview-and-confirmation action is available on main as pre-alpha, without a stable release. Do not publish a stable release until the remaining selection, browser, concurrency and security gates pass.

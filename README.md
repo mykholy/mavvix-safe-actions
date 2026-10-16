@@ -2,7 +2,7 @@
 
 **Fail-closed bulk changes for Filament 5.** Resolve the exact selection, preview its size, revalidate at confirmation, and mutate records within a single database transaction.
 
-> **Pre-alpha.** Development branch only. No Packagist publication or stable tag yet; production use is not recommended.
+> **Pre-alpha on main.** No Packagist publication or stable tag yet; production use is not recommended.
 
 ## How it works
 
@@ -37,12 +37,12 @@ Packagist publication is not available yet. In a disposable Filament 5 applicati
 
 ~~~bash
 composer config repositories.mavvix vcs https://github.com/mykholy/mavvix-safe-actions
-composer require "mykholy/mavvix-safe-actions:dev-feat/pr00-selection-foundation"
+composer require "mykholy/mavvix-safe-actions:dev-main"
 php artisan vendor:publish --tag=safe-actions-migrations
 php artisan migrate
 ~~~
 
-Run package tests on the development branch with composer install, vendor/bin/phpunit and vendor/bin/pint --test.
+Clone the default branch and run composer install, vendor/bin/phpunit and vendor/bin/pint --test.
 
 ## Native Filament action
 
