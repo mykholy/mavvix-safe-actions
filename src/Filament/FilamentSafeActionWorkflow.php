@@ -32,7 +32,7 @@ final class FilamentSafeActionWorkflow
     }
 
     /**
-     * @param callable(Model): bool $authorize
+     * @param  callable(Model): bool  $authorize
      * @param  callable(Model): void  $mutate
      */
     public function execute(
