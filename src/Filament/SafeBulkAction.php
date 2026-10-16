@@ -22,9 +22,9 @@ use Mavvix\SafeActions\Preflight\PreflightContext;
 final class SafeBulkAction
 {
     /**
-     * @param callable(HasTable): PreflightContext $context
-     * @param callable(Model): bool $authorize
-     * @param callable(Model): void $mutate
+     * @param  callable(HasTable): PreflightContext  $context
+     * @param  callable(Model): bool  $authorize
+     * @param  callable(Model): void  $mutate
      */
     public static function make(
         string $name,
