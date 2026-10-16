@@ -7,9 +7,9 @@ namespace Mavvix\SafeActions\Filament;
 use Filament\Tables\Contracts\HasTable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Mavvix\SafeActions\Exceptions\UnsafeSelection;
 use Mavvix\SafeActions\Execution\ExecutionResult;
 use Mavvix\SafeActions\Execution\GuardedExecutor;
-use Mavvix\SafeActions\Exceptions\UnsafeSelection;
 use Mavvix\SafeActions\Preflight\PreflightContext;
 use Mavvix\SafeActions\Preflight\PreflightStore;
 use Mavvix\SafeActions\Preflight\PreflightTicket;
@@ -23,7 +23,7 @@ final class FilamentSafeActionWorkflow
         private readonly GuardedExecutor $executor,
     ) {}
 
-    /** @param callable(Model): bool $authorize */
+    /** @param  callable(Model): bool  $authorize */
     public function preview(HasTable $component, PreflightContext $context, callable $authorize): PreflightTicket
     {
         $inspection = $this->inspector->inspect($component, $authorize);
@@ -33,7 +33,7 @@ final class FilamentSafeActionWorkflow
 
     /**
      * @param callable(Model): bool $authorize
-     * @param callable(Model): void $mutate
+     * @param  callable(Model): void  $mutate
      */
     public function execute(
         HasTable $component,
