@@ -1,6 +1,6 @@
 # Mavvix Safe Actions — Implementation Plan
 
-**Status:** Pre-alpha implementation underway — selection adapter and read-only preflight storage complete; mutation execution not implemented  
+**Status:** Pre-alpha implementation — selection adapter, native confirmation, bounded transactional execution and scope-bound preflight available on a draft development branch; stable release gates remain open  
 **Date:** 17 October 2026  
 **Product:** Free, open-source FilamentPHP plugin  
 **Composer package:** `mykholy/mavvix-safe-actions` (development branch; not published on Packagist)  
@@ -319,4 +319,4 @@ These are **release blockers**, not details left for the last PR:
 
 ---
 
-**Current project state:** This document is an implementation specification. Repository creation, code, tests, benchmarks, CI and publication have not been completed by writing this document.
+**Current project state:** Development code, tests, CI and documentation are present in the repository draft PR. This is not a security-reviewed stable release. Benchmarks, real-driver concurrency testing, independent review and publication remain incomplete.
