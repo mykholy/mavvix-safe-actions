@@ -35,3 +35,8 @@ jobs:
         run: vendor/bin/phpunit
       - name: Verify formatting
         run: vendor/bin/pint --test
+      - name: Show expected formatting changes
+        if: failure()
+        run: |
+          vendor/bin/pint
+          git --no-pager diff -- src tests
