@@ -4,16 +4,25 @@ declare(strict_types=1);
 
 namespace Mavvix\SafeActions\Preflight;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Mavvix\SafeActions\Exceptions\UnsafeSelection;
 use Mavvix\SafeActions\Selection\SelectionInspection;
 
-/** Persisted, read-only preflight snapshots. No mutation is authorized by this store. */
+/**
+ * Persists bounded, read-only snapshots. A query-bound snapshot can later be
+ * passed to GuardedExecutor; issuing a ticket never grants authorization.
+ */
 final class PreflightStore
 {
-    public function issue(SelectionInspection $inspection, PreflightContext $context): PreflightTicket
-    {
+    public function __construct(private readonly ScopeFingerprint $fingerprint) {}
+
+    public function issue(
+        SelectionInspection $inspection,
+        PreflightContext $context,
+        ?Builder $permittedScope = null,
+    ): PreflightTicket {
         $this->validateInspection($inspection);
 
         $ttl = (int) config('safe-actions.preflight_ttl_seconds', 300);
@@ -37,6 +46,7 @@ final class PreflightStore
             'record_keys' => $inspection->recordKeys,
             'record_count' => $inspection->recordCount,
             'selection_digest' => $inspection->selectionDigest,
+            'scope_digest' => $permittedScope === null ? null : $this->fingerprint->forQuery($permittedScope),
             'expires_at' => $expiresAt,
         ]);
 
@@ -85,10 +95,18 @@ final class PreflightStore
             throw UnsafeSelection::invalid();
         }
 
+        $previous = null;
+
         foreach ($keys as $key) {
-            if (! is_string($key) || $key === '') {
+            if (! is_string($key) || $key === '' || strlen($key) > 191) {
                 throw UnsafeSelection::invalid();
             }
+
+            if ($previous !== null && strcmp($previous, $key) >= 0) {
+                throw UnsafeSelection::invalid();
+            }
+
+            $previous = $key;
         }
 
         if (! hash_equals($inspection->selectionDigest, hash('sha256', json_encode($keys, JSON_THROW_ON_ERROR)))) {
