@@ -67,7 +67,6 @@ final class GuardedOrdersTable extends Component implements HasActions, HasSchem
         }
     }
 
-
     private function actionContext(): PreflightContext
     {
         return new PreflightContext('user', '42', 'web', 'archive', 'tenant', '1', 'admin');
@@ -109,7 +108,7 @@ final class GuardedOrdersTable extends Component implements HasActions, HasSchem
             );
 
             $this->safeExecutedCount = $result->affectedRecords;
-        } catch (UnsafeSelection | UnsafeExecution $exception) {
+        } catch (UnsafeSelection|UnsafeExecution $exception) {
             $this->safeActionError = $exception->getMessage();
         }
     }
