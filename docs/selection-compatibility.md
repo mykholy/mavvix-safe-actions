@@ -1,6 +1,6 @@
 # Filament 5 selection compatibility — discovery log
 
-Status: **PR-00 in progress. An explicit-ID inspector and a bounded Filament selection adapter are under integration testing in Laravel 12/13 CI.**
+Status: **Pre-alpha. A bounded Filament selection adapter, query-bound preflight and guarded synchronous execution are tested in Laravel 12/13 CI. Additional driver and security testing is required.**
 
 ## Verified public APIs in Filament 5 documentation
 
@@ -36,4 +36,4 @@ GitHub issue filamentphp/filament#20050 described records excluded by `checkIfRe
 4. Extend the existing inspector regression cases (828/842 and 101/18) with Filament selectability and filtered all-matching cases, UUID keys and permission changes.
 5. If exact target identity cannot be proven, disable that mode and display a clear unsupported-selection error.
 
-No actionable `SafeBulkAction` should be released before these gates pass.
+A preview-and-confirmation action is available on the development branch only. Do not publish a stable release until the remaining selection, browser, concurrency and security gates pass.
