@@ -1,6 +1,6 @@
 # Filament 5 selection compatibility — discovery log
 
-Status: **PR-00 in progress. Host Filament tests are authored; CI confirmation pending.**
+Status: **PR-00 in progress. Explicit-selection inspector and native Filament Livewire smoke tests pass in Laravel 12/13 CI.**
 
 ## Verified public APIs in Filament 5 documentation
 
@@ -21,8 +21,8 @@ GitHub issue filamentphp/filament#20050 described records excluded by `checkIfRe
 
 | Mode | Initial support claim | Test status |
 | --- | --- | --- |
-| Explicit key list with a host-supplied scoped Eloquent query | Headless inspector only | Package regression tests authored; CI pending |
-| Filament manually checked rows | Not yet supported end-to-end | Host Livewire test needed |
+| Explicit key list with a host-supplied scoped Eloquent query | Headless inspector only | Package tests pass in Laravel 12/13 CI |
+| Filament manually checked rows | Not yet supported end-to-end | Manually checked rows reach a native bulk action in a Livewire smoke test; safe adapter still needed |
 | Filament current-page select-all | Not yet supported end-to-end | Host Livewire test needed |
 | Filtered/select-all-matching | Not supported | Inverse selection adapter and integration tests needed |
 | Selection with row selectability closure | Not yet supported end-to-end | Must re-evaluate closure/eligibility server-side |
@@ -33,7 +33,7 @@ GitHub issue filamentphp/filament#20050 described records excluded by `checkIfRe
 1. Create a Testbench + Filament host Livewire table that exposes the selected IDs through **public APIs**, without inspecting Livewire's private state.
 2. Confirm what data modal hooks see **before** `authorizeIndividualRecords()` removes records.
 3. Prove that the selected-key scope exactly equals the table's filters, search, global scopes and tenant boundary.
-4. Add a regression suite for mismatched counts (828/842), nonselectable rows (101/18), missing keys, UUID keys and permission changes.
+4. Extend the existing inspector regression cases (828/842 and 101/18) with Filament selectability and filtered all-matching cases, UUID keys and permission changes.
 5. If exact target identity cannot be proven, disable that mode and display a clear unsupported-selection error.
 
 No actionable `SafeBulkAction` should be released before these gates pass.

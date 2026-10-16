@@ -14,18 +14,24 @@ This first engineering increment includes:
 - `SelectionInspector`, a read-only, fail-closed check for explicitly supplied record IDs.
 - Strict, bounded primary-key validation; exact set comparison; per-record eligibility callbacks.
 - Regression fixtures for filtered-out, unauthorized, missing and cross-tenant records.
-- An initial Laravel 11/12/13 CI matrix (pending execution and confirmation).
+- A passing PHP 8.3 / Laravel 12 and PHP 8.4 / Laravel 13 CI matrix, including a native Filament Livewire selection probe.
 
 **It does not yet integrate into Filament action modals, save preflight snapshots, confirm or execute bulk mutations.** Do not use its result as an authorization token or as a guarantee against concurrent changes. The caller is responsible for constructing the correct scoped Eloquent query and invoking actual Laravel policies in their callback.
 
-## Development installation
+## Development setup
+
+The implementation currently lives in a draft pull request, not on `main`. To inspect and test the code:
 
 ```bash
-composer config repositories.mavvix-safe-actions vcs https://github.com/mykholy/mavvix-safe-actions
-composer require mykholy/mavvix-safe-actions:dev-main
+git clone https://github.com/mykholy/mavvix-safe-actions.git
+cd mavvix-safe-actions
+git switch feat/pr00-selection-foundation
+composer install
+vendor/bin/phpunit
+vendor/bin/pint --test
 ```
 
-After a tagged release, use the appropriate stable constraint instead. This is source installation for contributors and testers, not a recommended production setup.
+Do not install `dev-main` as an application dependency yet: the repository has no published package release or production-ready action API. This branch is for development and review only.
 
 ## Selection inspector (internal integration API, subject to change)
 
