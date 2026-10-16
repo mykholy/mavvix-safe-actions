@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mavvix\SafeActions\Tests;
 
+use BladeUI\Icons\BladeIconsServiceProvider;
 use Filament\Actions\ActionsServiceProvider;
 use Filament\FilamentServiceProvider;
 use Filament\Schemas\SchemasServiceProvider;
@@ -21,6 +22,7 @@ abstract class TestCase extends OrchestraTestCase
     {
         return [
             SafeActionsServiceProvider::class,
+            BladeIconsServiceProvider::class,
             LivewireServiceProvider::class,
             FilamentServiceProvider::class,
             SupportServiceProvider::class,
