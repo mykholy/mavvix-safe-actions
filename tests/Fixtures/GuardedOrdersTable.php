@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Mavvix\SafeActions\Tests\Fixtures;
 
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -16,8 +20,10 @@ use Livewire\Component;
 use Mavvix\SafeActions\Exceptions\UnsafeSelection;
 use Mavvix\SafeActions\Selection\FilamentSelectionInspector;
 
-final class GuardedOrdersTable extends Component implements HasTable
+final class GuardedOrdersTable extends Component implements HasActions, HasSchemas, HasTable
 {
+    use InteractsWithActions;
+    use InteractsWithSchemas;
     use InteractsWithTable;
 
     public ?int $inspectedCount = null;
