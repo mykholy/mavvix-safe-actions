@@ -43,7 +43,7 @@ Any exception before commit rolls back the transaction. The executor performs **
 
 ## Remaining verification work
 
-- Real MySQL and PostgreSQL driver tests for transaction and locking behavior.
+- MySQL 8.4 and PostgreSQL 16 functional tests pass; still require **two-session parallel submission** tests for locking and idempotency.
 - Two-session parallel confirmation of the same ticket.
 - Browser and accessibility tests for modal error, cancel and success states.
 - Static analysis and independent security review.
