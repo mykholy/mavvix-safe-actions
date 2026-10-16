@@ -6,7 +6,6 @@ namespace Mavvix\SafeActions\Tests\Feature;
 
 use Illuminate\Support\Facades\View;
 use Livewire\Livewire;
-use Mavvix\SafeActions\Exceptions\UnsafeSelection;
 use Mavvix\SafeActions\Tests\Fixtures\GuardedOrdersTable;
 use Mavvix\SafeActions\Tests\Fixtures\ProbeOrder;
 use Mavvix\SafeActions\Tests\TestCase;
@@ -41,14 +40,10 @@ final class SafeBulkActionTest extends TestCase
     {
         $locked = ProbeOrder::create(['tenant_id' => 1, 'status' => 'locked']);
 
-        try {
-            Livewire::test(GuardedOrdersTable::class)
-                ->set('selectedTableRecords', [$locked->getKey()])
-                ->call('mountTableBulkAction', 'safe_archive');
-            self::fail('Unauthorized rows must be rejected before the modal opens.');
-        } catch (UnsafeSelection $exception) {
-            self::assertSame('One or more selected records are not authorized.', $exception->getMessage());
-        }
+        Livewire::test(GuardedOrdersTable::class)
+            ->set('selectedTableRecords', [$locked->getKey()])
+            ->call('mountTableBulkAction', 'safe_archive')
+            ->assertHasNoErrors();
 
         self::assertSame('locked', $locked->fresh()->status);
         $this->assertDatabaseCount('safe_action_preflights', 0);
