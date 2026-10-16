@@ -7,10 +7,13 @@ namespace Mavvix\SafeActions\Filament;
 use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 use Mavvix\SafeActions\Exceptions\UnsafeExecution;
+use Mavvix\SafeActions\Exceptions\UnsafeSelection;
 use Mavvix\SafeActions\Preflight\PreflightContext;
 
 /**
@@ -44,11 +47,21 @@ final class SafeBulkAction
                     ->dehydrated(false),
             ])
             ->mountUsing(function (Schema $schema, HasTable $livewire) use ($context, $authorize): void {
-                $ticket = app(FilamentSafeActionWorkflow::class)->preview(
-                    $livewire,
-                    $context($livewire),
-                    $authorize,
-                );
+                try {
+                    $ticket = app(FilamentSafeActionWorkflow::class)->preview(
+                        $livewire,
+                        $context($livewire),
+                        $authorize,
+                    );
+                } catch (UnsafeSelection $exception) {
+                    Notification::make()
+                        ->title('Unable to preview the selected records')
+                        ->body($exception->getMessage())
+                        ->danger()
+                        ->send();
+
+                    throw new Halt;
+                }
 
                 $schema->fill([
                     'safe_action_ticket' => $ticket->id,
@@ -62,13 +75,23 @@ final class SafeBulkAction
                     throw UnsafeExecution::unavailable();
                 }
 
-                app(FilamentSafeActionWorkflow::class)->execute(
-                    $livewire,
-                    $ticketId,
-                    $context($livewire),
-                    $authorize,
-                    $mutate,
-                );
+                try {
+                    app(FilamentSafeActionWorkflow::class)->execute(
+                        $livewire,
+                        $ticketId,
+                        $context($livewire),
+                        $authorize,
+                        $mutate,
+                    );
+                } catch (UnsafeSelection | UnsafeExecution $exception) {
+                    Notification::make()
+                        ->title('Safe action was not executed')
+                        ->body($exception->getMessage())
+                        ->danger()
+                        ->send();
+
+                    throw new Halt;
+                }
             });
     }
 }
