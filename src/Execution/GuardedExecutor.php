@@ -29,8 +29,8 @@ final class GuardedExecutor
     ) {}
 
     /**
-     * @param callable(Model): bool $authorize
-     * @param callable(Model): void $mutate
+     * @param  callable(Model): bool  $authorize
+     * @param  callable(Model): void  $mutate
      *
      * @throws Throwable
      */
