@@ -21,7 +21,8 @@
 - [x] Atomic bounded database mutation and revalidation (SQLite CI)
 - [x] Sequential duplicate-submission, stale-scope, revoked-policy and rollback tests
 - [ ] Two-session concurrency tests on MySQL and PostgreSQL
-- [ ] MySQL/PostgreSQL driver matrix, benchmarks and translated UI
+- [x] CI test matrix on SQLite, MySQL 8.4 and PostgreSQL 16
+- [ ] Benchmarks and translated UI
 - [ ] Independent security review, accessibility/browser validation and release documentation
 
 **Release status: pre-alpha.** Do not tag v1.0.0 until all gates in `IMPLEMENTATION_PLAN.md` are satisfied.
