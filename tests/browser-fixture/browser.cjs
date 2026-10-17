@@ -40,15 +40,21 @@ const AxeBuilder = require('@axe-core/playwright').default;
         await page.getByText('Records to change').waitFor({ timeout: 15000 });
         await waitForModalAnimation();
 
-        const modal = page.getByRole('alertdialog').last();
+        const modal = page.locator('.fi-modal-window:visible').last();
         await modal.waitFor({ state: 'visible' });
+        const ariaModal = await modal.evaluate(window =>
+            window.closest('[role="alertdialog"]')?.getAttribute('aria-modal')
+        );
+        if (ariaModal !== 'true') {
+            throw new Error('Confirmation window has no ARIA alertdialog ancestor.');
+        }
 
         // A keyboard user must not be able to Tab into the underlying table
         // while the consequential action is awaiting confirmation.
         for (let i = 0; i < 8; i++) {
             await page.keyboard.press('Tab');
             const focusedInModal = await page.evaluate(() =>
-                !!document.activeElement?.closest('[role="alertdialog"]')
+                !!document.activeElement?.closest('.fi-modal-window')
             );
             if (!focusedInModal) {
                 throw new Error('Keyboard focus escaped the confirmation dialog.');
