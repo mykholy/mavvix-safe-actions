@@ -83,6 +83,15 @@ jobs:
         run: vendor/bin/phpunit
       - name: Verify independent MySQL transactions
         run: vendor/bin/phpunit --filter ConcurrentExecutionTest --fail-on-skipped
+      - name: Benchmark bounded MySQL operations
+        env:
+          SAFE_ACTIONS_BENCHMARK_REPORT: ${{ runner.temp }}/safe-actions-bench-mysql.jsonl
+        run: vendor/bin/phpunit --filter PerformanceBenchmarkTest --fail-on-skipped
+      - uses: actions/upload-artifact@v4
+        with:
+          name: safe-actions-bench-mysql
+          path: ${{ runner.temp }}/safe-actions-bench-mysql.jsonl
+          if-no-files-found: error
 
   postgres:
     name: PostgreSQL 16 / Laravel 12
@@ -126,3 +135,12 @@ jobs:
         run: vendor/bin/phpunit
       - name: Verify independent PostgreSQL transactions
         run: vendor/bin/phpunit --filter ConcurrentExecutionTest --fail-on-skipped
+      - name: Benchmark bounded PostgreSQL operations
+        env:
+          SAFE_ACTIONS_BENCHMARK_REPORT: ${{ runner.temp }}/safe-actions-bench-postgres.jsonl
+        run: vendor/bin/phpunit --filter PerformanceBenchmarkTest --fail-on-skipped
+      - uses: actions/upload-artifact@v4
+        with:
+          name: safe-actions-bench-postgres
+          path: ${{ runner.temp }}/safe-actions-bench-postgres.jsonl
+          if-no-files-found: error
