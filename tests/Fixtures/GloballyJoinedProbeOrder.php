@@ -15,7 +15,7 @@ final class GloballyJoinedProbeOrder extends Model
 
     protected static function booted(): void
     {
-        static::addGlobalScope('duplicate-tenant-join', static function (Builder $builder): void {
+        self::addGlobalScope('duplicate-tenant-join', static function (Builder $builder): void {
             $builder->join('probe_orders as related_orders', 'related_orders.tenant_id', '=', 'probe_orders.tenant_id');
         });
     }
