@@ -94,4 +94,20 @@ final class DeclaredChangePreviewTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         DeclaredChangePreview::validate(['status' => 'archived']);
     }
+
+    public function test_custom_protected_columns_cannot_unprotect_builtin_ownership_keys(): void
+    {
+        config()->set('safe-actions.protected_update_columns', ['branch_id']);
+
+        foreach (['tenant_id', 'organization_id', 'workspace_id', 'team_id', 'account_id', 'company_id', 'owner_id'] as $column) {
+            try {
+                DeclaredChangePreview::validate([$column => 2]);
+                self::fail("A custom config must not allow ownership column [{$column}].");
+            } catch (InvalidArgumentException $exception) {
+                self::assertSame('Declared update contains an unsupported field or value.', $exception->getMessage());
+            }
+        }
+
+        DeclaredChangePreview::validate(['status' => 'archived']);
+    }
 }
