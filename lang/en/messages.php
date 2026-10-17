@@ -28,6 +28,7 @@ return [
         'selection_changed' => 'The selected records changed after the preflight. Start a new preview.',
         'state_unbound' => 'This older preflight has no record-state snapshot. Start a new preview.',
         'record_changed' => 'One or more selected records changed since preview. Start a new preview.',
+        'database_busy' => 'Records are temporarily locked by another operation. This action did not commit; start a new preview.',
         'connection_mismatch' => 'Preflight and selected records must use the same database connection.',
         'unsupported_scope' => 'A paginated or limited query cannot safely execute this selection.',
     ],

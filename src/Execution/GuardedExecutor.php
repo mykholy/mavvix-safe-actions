@@ -6,6 +6,7 @@ namespace Mavvix\SafeActions\Execution;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Mavvix\SafeActions\Exceptions\UnsafeExecution;
 use Mavvix\SafeActions\Exceptions\UnsafeSelection;
 use Mavvix\SafeActions\Preflight\PreflightContext;
@@ -58,7 +59,8 @@ final class GuardedExecutor
 
         // Do not retry this callback automatically: host-provided mutation code
         // may not be safe to invoke more than once.
-        return $connection->transaction(function () use ($preflightId, $context, $permittedScope, $authorize, $mutate, $model): ExecutionResult {
+        try {
+            return $connection->transaction(function () use ($preflightId, $context, $permittedScope, $authorize, $mutate, $model): ExecutionResult {
             // Serialize confirmation attempts on the same ticket.
             $ticket = SafeActionPreflight::query()
                 ->whereKey($preflightId)
@@ -143,6 +145,19 @@ final class GuardedExecutor
             $ticket->forceFill(['consumed_at' => now()])->save();
 
             return new ExecutionResult($preflightId, $records->count());
-        });
+            });
+        } catch (QueryException $exception) {
+            // Surface only known deadlock/lock-timeout conditions as a safe
+            // retryable failure. Do not leak raw SQL/driver errors to the UI.
+            $state = (string) $exception->getCode();
+            $driverCode = (int) ($exception->errorInfo[1] ?? 0);
+
+            if (in_array($state, ['40001', '40P01', '55P03'], true) ||
+                in_array($driverCode, [1205, 1213], true)) {
+                throw UnsafeExecution::databaseBusy($exception);
+            }
+
+            throw $exception;
+        }
     }
 }
