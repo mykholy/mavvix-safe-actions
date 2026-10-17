@@ -18,6 +18,11 @@ All noteworthy changes will be documented here. Until the first stable release, 
 - Transactional guarded executor with row revalidation, record locking where supported, and rollback on callback failure.
 - Native Filament bulk action with a confirmation modal and verified record count.
 - Optional developer-declared scalar updates with a bounded, read-only previous-to-target field preview.
+- Fresh Laravel 12 host installation + migration + actual guarded execution smoke test.
+- Real Chromium English and Arabic Filament modal testing, including expired token and unauthorized row failure cases.
+- Automated axe-core WCAG scan of English desktop and Arabic dark/mobile modal, with no reported violations and one incomplete item in each run.
+- Explicit Composer security audit jobs for Laravel 12 and 13.
+- Reproducible single-run MySQL and PostgreSQL measurements for 1/100/500 records.
 - Livewire, Testbench, security regression, PHPUnit and Laravel Pint CI coverage.
 - MySQL 8.4 and PostgreSQL 16 functional test jobs in CI.
 - Independent-process parallel ticket replay and stale-scope regression coverage for MySQL and PostgreSQL.
@@ -30,6 +35,6 @@ All noteworthy changes will be documented here. Until the first stable release, 
 ### Not yet complete
 
 - Independent security review, broader lock-contention testing and scalability benchmarks.
-- Full browser UX and accessibility review.
+- Manual browser UX, keyboard navigation and screen-reader accessibility review.
 - Large-scale queued execution, audit history, impact diffs and rollback after successful commit.
 - Filament 4 support or a versioned stable compatibility contract.
