@@ -38,6 +38,7 @@
 - [x] Fresh Laravel 12 Composer install + migration + guarded execution smoke test
 - [x] Real Chromium modal cancel, confirm, expired-token, unauthorized-row, English/Arabic and mobile-dark checks
 - [x] Automated axe-core desktop and mobile RTL/dark scan with no reported violations (manual checks outstanding)
+- [x] Automated browser keyboard focus trap and Escape-cancel regression (manual assistive technology validation outstanding)
 - [x] Composer security audit CI on Laravel 12 and 13
 - [ ] Independent security review and sign-off
 - [ ] Manual keyboard/screen reader accessibility validation and complex selection UX
