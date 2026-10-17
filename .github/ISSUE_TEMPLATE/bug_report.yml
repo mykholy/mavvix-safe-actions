@@ -1,0 +1,57 @@
+name: Bug report
+description: Report a reproducible behavior or compatibility regression. Never disclose security exploits here.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. For a possible tenant bypass, unauthorized mutation, replay exploit or other vulnerability, **do not create a public issue**. Use the private vulnerability reporting instructions in SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: Mavvix Safe Actions version
+      placeholder: v1.0.1
+    validations:
+      required: true
+  - type: input
+    id: stack
+    attributes:
+      label: PHP / Laravel / Filament versions
+      placeholder: "PHP 8.3, Laravel 12.x, Filament 5.x"
+    validations:
+      required: true
+  - type: dropdown
+    id: database
+    attributes:
+      label: Database
+      options:
+        - MySQL
+        - PostgreSQL
+        - SQLite (functional tests only)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Use sanitized fixture data. Do not include secrets, personal data, or exploit details.
+      placeholder: |
+        1. Configure a model and scoped table...
+        2. Select records...
+        3. Preview and confirm...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and relevant redacted logs
+    validations:
+      required: true
