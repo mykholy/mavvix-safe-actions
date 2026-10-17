@@ -23,6 +23,7 @@ return new class extends Migration
             $table->unsignedInteger('record_count');
             $table->char('selection_digest', 64);
             $table->char('scope_digest', 64)->nullable();
+            $table->char('record_state_digest', 64)->nullable();
             $table->timestamp('expires_at');
             $table->timestamp('consumed_at')->nullable();
             $table->timestamps();

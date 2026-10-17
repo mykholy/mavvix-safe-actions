@@ -23,6 +23,16 @@ final class UnsafeExecution extends RuntimeException
         return new self(LocalizableError::message('scope_changed', 'The permitted query changed after the preflight. Start a new preview.'));
     }
 
+    public static function stateUnbound(): self
+    {
+        return new self(LocalizableError::message('state_unbound', 'This older preflight has no record-state snapshot. Start a new preview.'));
+    }
+
+    public static function recordChanged(): self
+    {
+        return new self(LocalizableError::message('record_changed', 'One or more selected records changed since preview. Start a new preview.'));
+    }
+
     public static function selectionChanged(): self
     {
         return new self(LocalizableError::message('selection_changed', 'The selected records changed after the preflight. Start a new preview.'));

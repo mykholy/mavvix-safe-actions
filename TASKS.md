@@ -29,6 +29,7 @@
 - [x] Native modal and exception translations in English and Arabic
 - [x] Configurable pruning command for old preflight tickets
 - [x] Reject changes to current selected rows after preview
+- [x] Reject changes to persisted selected model values between preview and confirmation, including same-scope updates
 - [x] Single-run MySQL/PostgreSQL microbenchmarks for 1, 100 and 500 records, archived as CI artifacts
 - [ ] Representative warmed-up throughput and percentile benchmarks with concurrency load
 - [x] Drop security-EOL Laravel 11 from Composer compatibility constraints

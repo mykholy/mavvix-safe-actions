@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property list<string> $record_keys
  * @property string $selection_digest
  * @property string|null $scope_digest
+ * @property string|null $record_state_digest
  * @property CarbonImmutable $expires_at
  * @property CarbonImmutable|null $consumed_at
  */

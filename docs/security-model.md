@@ -12,7 +12,7 @@ The design goal is **no unexpected record mutations**, not to replace Laravel po
 
 The inspector validates a canonical key list and resolves it against the live, filtered Eloquent query. It rejects missing, foreign-tenant and unauthorized rows. The Filament adapter also checks row selectability and denies unsupported pivot/non-Eloquent modes.
 
-The resulting preflight ticket persists the exact IDs, digest, actor, guard, tenant, panel and action. A *query-bound* ticket additionally persists a SHA-256 fingerprint of the model, database connection, SQL and bindings. A ticket with no query fingerprint is **not executable**.
+The resulting preflight ticket persists the exact IDs, digest, actor, guard, tenant, panel and action. A *query-bound* ticket additionally persists a SHA-256 fingerprint of the model, database connection, SQL and bindings, plus a digest of the selected model's persisted attributes. Tickets without either fingerprint are **not executable**. The state digest is an optimistic concurrency check, not an immutable audit trail or an HMAC.
 
 ## Confirmation invariant
 
@@ -22,8 +22,9 @@ A single database transaction:
 2. Verifies the current server context and query fingerprint.
 3. Reads and locks every requested row using the **fresh** server-scoped query.
 4. Requires the exact same set of IDs and re-evaluates authorization.
-5. Applies the mutation callback, then marks the ticket consumed.
-6. Commits both the business changes and ticket consumption together.
+5. Rejects selected records whose loaded persisted model attributes changed after preview, even if their IDs and query scope did not.
+6. Applies the mutation callback, then marks the ticket consumed.
+7. Commits both the business changes and ticket consumption together.
 
 Any exception before commit rolls back the transaction. The executor performs **no automatic transaction retries** because a custom mutation callback might not be safe to repeat.
 
@@ -36,6 +37,8 @@ Any exception before commit rolls back the transaction. The executor performs **
 | Different actor, tenant, guard, panel or action | Ticket unavailable |
 | Changed SQL or query bindings | New preview required |
 | Changed selected record IDs without changing filters | New preview required |
+| Changed persisted selected record attributes without changing IDs or query | New preview required |
+| Older ticket issued without a model-state digest | New preview required |
 | Expired / already used ticket | Ticket unavailable |
 | More than the configured record limit | Entire action rejected |
 | Pivot identity / unbounded selection / foreign DB connection | Unsupported |
@@ -52,4 +55,4 @@ Any exception before commit rolls back the transaction. The executor performs **
 - Defensive handling of model hooks that dispatch external effects, preferably via transactional outbox.
 - Explicit support-policy decision for complex grouped and relationship-backed tables.
 
-The project must not claim an immutable field diff, guaranteed rollback of third-party side effects, or generic multi-database atomicity.
+The state digest detects changes between two observed database states; it cannot prevent an intervening change that is reverted before confirmation, nor protect external side effects or records modified by a callback through another connection. The project must not claim an immutable field diff, guaranteed rollback of third-party side effects, or generic multi-database atomicity.

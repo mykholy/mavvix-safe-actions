@@ -32,6 +32,12 @@ final class PreflightStore
             throw new InvalidArgumentException('Preflight TTL must be between 30 and 900 seconds.');
         }
 
+        // Resolve a second, canonical view of the persisted model state. If the
+        // inspected keys drifted out of scope before ticket issuance, fail closed.
+        $stateDigest = $permittedScope === null
+            ? null
+            : (new RecordStateFingerprint)->forScope($permittedScope, $inspection);
+
         $expiresAt = now()->addSeconds($ttl)->toImmutable();
         $id = (string) Str::uuid();
 
@@ -47,6 +53,7 @@ final class PreflightStore
             'record_keys' => $inspection->recordKeys,
             'record_count' => $inspection->recordCount,
             'selection_digest' => $inspection->selectionDigest,
+            'record_state_digest' => $stateDigest,
             'scope_digest' => $permittedScope === null ? null : ($this->fingerprint ?? new ScopeFingerprint)->forQuery($permittedScope),
             'expires_at' => $expiresAt,
         ]);

@@ -10,6 +10,8 @@ All noteworthy changes will be documented here. Until the first stable release, 
 
 ### Added
 
+- Query-bound preflights now capture an optimistic fingerprint of selected model values and reject otherwise-authorized stale changes at confirmation; earlier tickets must be re-previewed after upgrade.
+- Regression tests for same-scope data drift, old ticket rejection and query projections that omit columns.
 - Composer package and Laravel auto-discovery.
 - Canonical, bounded explicit selection inspector.
 - Filament 5 adapter for filtered, current-page and bounded all-matching selections.
