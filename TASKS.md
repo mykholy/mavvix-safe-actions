@@ -29,6 +29,7 @@
 - [x] Configurable pruning command for old preflight tickets
 - [x] Reject changes to current selected rows after preview
 - [ ] Real-driver performance benchmarks for 1, 100 and 500 records
+- [x] Drop security-EOL Laravel 11 from Composer compatibility constraints
 - [ ] Independent security review, accessibility/browser validation and release documentation
 
 **Release status: pre-alpha.** Do not tag v1.0.0 until all gates in `IMPLEMENTATION_PLAN.md` are satisfied.

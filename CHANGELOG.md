@@ -4,6 +4,10 @@ All noteworthy changes will be documented here. Until the first stable release, 
 
 ## Unreleased — pre-alpha
 
+### Changed
+
+- Removed unsupported Laravel 11 and Testbench 9 from the Composer compatibility constraints; Laravel 11 security maintenance ended March 12, 2026.
+
 ### Added
 
 - Composer package and Laravel auto-discovery.
