@@ -215,4 +215,77 @@ final class ConcurrentExecutionTest extends TestCase
         self::assertNotNull(SafeActionPreflight::findOrFail($firstTicket)->consumed_at);
         self::assertNull(SafeActionPreflight::findOrFail($secondTicket)->consumed_at);
     }
+    public function test_abrupt_process_exit_rolls_back_record_and_preflight_consumption(): void
+    {
+        $order = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+        $ticket = $this->preview($order);
+        $marker = tempnam(sys_get_temp_dir(), 'mavvix-crash-');
+
+        if ($marker === false) {
+            throw new RuntimeException('Unable to create transaction crash marker.');
+        }
+
+        unlink($marker);
+
+        $pid = pcntl_fork();
+
+        if ($pid === -1) {
+            throw new RuntimeException('Unable to fork crash recovery test.');
+        }
+
+        if ($pid === 0) {
+            DB::purge();
+
+            app(GuardedExecutor::class)->execute(
+                $ticket,
+                $this->context(),
+                ProbeOrder::query()->where('tenant_id', 1)->where('status', 'pending'),
+                fn (Model $record): bool => $record->status === 'pending',
+                function (Model $record) use ($marker): void {
+                    $record->status = 'archived';
+                    $record->save();
+
+                    // Terminate the PHP process after the database UPDATE,
+                    // but before the executor can consume the ticket or COMMIT.
+                    file_put_contents($marker, 'inside-transaction');
+                    exit(73);
+                },
+            );
+
+            exit(74);
+        }
+
+        try {
+            $this->waitForChild($pid);
+
+            self::fail('The child should exit with a deliberate non-zero code.');
+        } catch (RuntimeException $exception) {
+            // A non-zero process exit is expected; waitForChild reports it.
+            self::assertStringContainsString('Child exited with a nonzero status', $exception->getMessage());
+        } finally {
+            clearstatcache(true, $marker);
+        }
+
+        self::assertFileExists($marker, 'The child must reach the mutation before terminating.');
+        unlink($marker);
+
+        self::assertSame('pending', $order->fresh()->status);
+        self::assertNull(SafeActionPreflight::findOrFail($ticket)->consumed_at);
+
+        $result = app(GuardedExecutor::class)->execute(
+            $ticket,
+            $this->context(),
+            ProbeOrder::query()->where('tenant_id', 1)->where('status', 'pending'),
+            fn (Model $record): bool => $record->status === 'pending',
+            function (Model $record): void {
+                $record->status = 'archived';
+                $record->save();
+            },
+        );
+
+        self::assertSame(1, $result->affectedRecords);
+        self::assertSame('archived', $order->fresh()->status);
+        self::assertNotNull(SafeActionPreflight::findOrFail($ticket)->consumed_at);
+    }
+
 }
