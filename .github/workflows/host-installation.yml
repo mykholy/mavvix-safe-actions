@@ -1,0 +1,36 @@
+name: Fresh host installation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  laravel12:
+    name: Laravel 12 fresh-project package install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, pdo_sqlite, dom, xml, zip
+          tools: composer:v2
+          coverage: none
+      - name: Create independent host and install the checked-out package
+        env:
+          SAFE_ACTIONS_HOST_PATH: ${{ runner.temp }}/safe-actions-host
+        run: |
+          composer create-project "laravel/laravel:^12.0" "$SAFE_ACTIONS_HOST_PATH" --no-interaction --prefer-dist --no-progress
+          cd "$SAFE_ACTIONS_HOST_PATH"
+          composer config repositories.local path "$GITHUB_WORKSPACE"
+          composer require "mykholy/mavvix-safe-actions:@dev" --no-interaction --prefer-dist --no-progress --with-all-dependencies
+          cp .env.example .env
+          touch database/database.sqlite
+          php artisan key:generate --force
+          php artisan vendor:publish --tag=safe-actions-migrations --force
+          php artisan migrate --force
+          php "$GITHUB_WORKSPACE/tests/host-smoke.php"
