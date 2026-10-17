@@ -9,7 +9,8 @@
 - [x] Install dependencies and obtain passing CI evidence (Laravel 12 / PHP 8.3, Laravel 13 / PHP 8.4)
 - [x] Run the explicit-record Filament v5 Livewire selection harness in both CI environments
 - [x] Add bounded adapter and Livewire regression coverage for filtered/all-matching selections (tested on Laravel 12/13)
-- [ ] Test pivot identity, global-search and grouped selections
+- [x] Test global search, explicit and inverse selections, and reject unsupported grouped/aggregate query shapes
+- [ ] Test pivot identity and Filament UI-level group/relationship selections
 - [ ] Obtain an independently reviewable selection adapter contract
 
 ## PR-01 onward

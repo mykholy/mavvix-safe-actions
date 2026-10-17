@@ -14,6 +14,7 @@ use Mavvix\SafeActions\Preflight\RecordStateFingerprint;
 use Mavvix\SafeActions\Preflight\SafeActionPreflight;
 use Mavvix\SafeActions\Preflight\ScopeFingerprint;
 use Mavvix\SafeActions\Selection\ExplicitKeys;
+use Mavvix\SafeActions\Selection\ScopeShapeGuard;
 use Throwable;
 
 /**
@@ -42,6 +43,8 @@ final class GuardedExecutor
         callable $authorize,
         callable $mutate,
     ): ExecutionResult {
+        ScopeShapeGuard::assertSupported($permittedScope);
+
         $model = $permittedScope->getModel();
         $connection = $model->getConnection();
 

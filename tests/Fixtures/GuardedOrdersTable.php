@@ -46,7 +46,7 @@ final class GuardedOrdersTable extends Component implements HasActions, HasSchem
     {
         return $table
             ->query(ProbeOrder::query()->where('tenant_id', 1))
-            ->columns([TextColumn::make('status')])
+            ->columns([TextColumn::make('status')->searchable()])
             ->toolbarActions([
                 SafeBulkAction::make(
                     'safe_archive',

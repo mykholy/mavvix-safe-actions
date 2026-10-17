@@ -35,6 +35,8 @@ final class FilamentSelectionInspector
             throw UnsafeSelection::unsupported();
         }
 
+        ScopeShapeGuard::assertSupported($scope);
+
         if ($state['isTrackingDeselectedTableRecords']) {
             return $this->inspectAllMatching($livewire, $scope, $mayAct, $limit, $state['deselectedTableRecords']);
         }

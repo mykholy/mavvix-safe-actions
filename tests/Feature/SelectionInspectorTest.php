@@ -68,6 +68,31 @@ final class SelectionInspectorTest extends TestCase
         );
     }
 
+    public function test_complex_query_shapes_fail_closed_before_selecting_records(): void
+    {
+        $row = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+
+        $scopes = [
+            ProbeOrder::query()->where('tenant_id', 1)->groupBy('status'),
+            ProbeOrder::query()->where('tenant_id', 1)->having('status', 'pending'),
+            ProbeOrder::query()->where('tenant_id', 1)->distinct(),
+            ProbeOrder::query()->where('tenant_id', 1)->union(
+                ProbeOrder::query()->where('tenant_id', 2),
+            ),
+        ];
+
+        foreach ($scopes as $scope) {
+            try {
+                (new SelectionInspector)->inspect($scope, [$row->getKey()], fn (): bool => true);
+                self::fail('Grouped, having, distinct and union scopes must not resolve mutable targets.');
+            } catch (UnsafeSelection $exception) {
+                self::assertSame('This Filament selection mode is not supported safely.', $exception->getMessage());
+            }
+        }
+
+        self::assertSame('pending', $row->fresh()->status);
+    }
+
     public function test_missing_key_fails_entire_inspection(): void
     {
         $existing = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
