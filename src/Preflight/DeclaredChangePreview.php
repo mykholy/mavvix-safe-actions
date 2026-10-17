@@ -30,7 +30,10 @@ final class DeclaredChangePreview
 
         $protected = config('safe-actions.protected_update_columns', []);
 
-        if (! is_array($protected) || array_filter($protected, static fn (mixed $column): bool => ! is_string($column)) !== []) {
+        if (
+            ! is_array($protected) ||
+            array_filter($protected, static fn (mixed $column): bool => ! is_string($column)) !== []
+        ) {
             throw new InvalidArgumentException('Protected update columns must be an array of column names.');
         }
 
