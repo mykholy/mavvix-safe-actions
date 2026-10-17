@@ -40,7 +40,7 @@ const AxeBuilder = require('@axe-core/playwright').default;
         await page.getByText('Records to change').waitFor({ timeout: 15000 });
         await waitForModalAnimation();
 
-        const modal = page.getByRole('dialog').last();
+        const modal = page.getByRole('alertdialog').last();
         await modal.waitFor({ state: 'visible' });
 
         // A keyboard user must not be able to Tab into the underlying table
@@ -48,7 +48,7 @@ const AxeBuilder = require('@axe-core/playwright').default;
         for (let i = 0; i < 8; i++) {
             await page.keyboard.press('Tab');
             const focusedInModal = await page.evaluate(() =>
-                !!document.activeElement?.closest('[role="dialog"]')
+                !!document.activeElement?.closest('[role="alertdialog"]')
             );
             if (!focusedInModal) {
                 throw new Error('Keyboard focus escaped the confirmation dialog.');
