@@ -2,7 +2,7 @@
 
 **Fail-closed bulk changes for Filament 5.** Resolve the exact selection, preview its size, revalidate at confirmation, and mutate records within a single database transaction.
 
-> **Pre-alpha on main.** No Packagist publication or stable tag yet; production use is not recommended.
+> **v1.0.0 stable SemVer API (GitHub release).** This is a narrowly scoped Eloquent/Filament 5 integration, not an independent security certification. Read the [first-party security review](docs/security-review-v1.0.0.md) and verify the [GitHub release](https://github.com/mykholy/mavvix-safe-actions/releases/tag/v1.0.0) before deploying. Automated release publication requires five green same-commit workflows. Human assistive-tech, external security review and production-shaped performance assurance remain outstanding.
 
 ## How it works
 
@@ -32,18 +32,18 @@ The ticket can be used successfully only once. A failure aborts the transaction 
 
 Selections are capped at **500 records** by default. For inverse (all-matching except explicitly deselected IDs) selection, the exclusion is applied to the filtered, tenant-scoped SQL query **before** checking the cap. Larger resulting selections still fail closed; this package does not silently truncate execution.
 
-## Install for development
+## Install v1.0.0
 
-Packagist publication is not available yet. In a disposable Filament 5 application:
+The GitHub tag is the authoritative release. Until the package is independently listed on Packagist, add the repository as a Composer VCS source in your Filament 5 application:
 
 ~~~bash
 composer config repositories.mavvix vcs https://github.com/mykholy/mavvix-safe-actions
-composer require "mykholy/mavvix-safe-actions:dev-main"
+composer require "mykholy/mavvix-safe-actions:^1.0"
 php artisan vendor:publish --tag=safe-actions-migrations
 php artisan migrate
 ~~~
 
-Clone the default branch and run composer install, vendor/bin/phpunit and vendor/bin/pint --test.
+Once Packagist indexing is verified, the VCS configuration is unnecessary. Never substitute `dev-main` for a production pinned release. Run `composer validate --strict`, `vendor/bin/phpunit`, and `vendor/bin/pint --test` in a clone when contributing.
 
 ## Native Filament action
 
@@ -193,7 +193,7 @@ Callbacks must be short-running, synchronous and database-only. Do not perform i
 
 ## Documentation and development
 
-[Implementation plan](IMPLEMENTATION_PLAN.md) · [Release playbook](docs/release-playbook.md) · [Compatibility verification](docs/compatibility-verification.md) · [Task board](TASKS.md) · [Selection compatibility](docs/selection-compatibility.md) · [Security model](docs/security-model.md) · [Measured CI benchmarks](docs/benchmark-results-2026-10-17.md) · [Release review packet](docs/release-candidate-review-packet-2026-10-18.md) · [Release readiness](docs/release-readiness-2026-10-17.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [CI](.github/workflows/tests.yml)
+[Implementation plan](IMPLEMENTATION_PLAN.md) · [Release playbook](docs/release-playbook.md) · [Compatibility verification](docs/compatibility-verification.md) · [Task board](TASKS.md) · [Selection compatibility](docs/selection-compatibility.md) · [Security model](docs/security-model.md) · [Measured CI benchmarks](docs/benchmark-results-2026-10-17.md) · [First-party security review](docs/security-review-v1.0.0.md) · [v1.0.0 release notes](docs/releases/v1.0.0.md) · [Release review packet](docs/release-candidate-review-packet-2026-10-18.md) · [Release readiness](docs/release-readiness-2026-10-17.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [CI](.github/workflows/tests.yml)
 
 To report a vulnerability, use a private GitHub Security Advisory if available. Do not publish exploit details in a public issue.
 
