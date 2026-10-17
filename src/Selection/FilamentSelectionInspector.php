@@ -115,6 +115,7 @@ final class FilamentSelectionInspector
 
         return $this->inspector->inspect($scope, $keys, $mayAct, $limit);
     }
+
     /**
      * Filament's HasTable interface doesn't declare Livewire selection state.
      * Inspect public component state explicitly rather than assuming the trait
@@ -147,5 +148,4 @@ final class FilamentSelectionInspector
             'isTrackingDeselectedTableRecords' => $state['isTrackingDeselectedTableRecords'],
         ];
     }
-
 }
