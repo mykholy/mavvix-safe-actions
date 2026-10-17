@@ -22,6 +22,7 @@ final class FilamentSelectionInspector
     {
         $limit ??= (int) config('safe-actions.max_explicit_selection', 500);
         $table = $livewire->getTable();
+        $state = $this->readSelectionState($livewire);
 
         // Pivot-row identities and non-Eloquent data sources need a different resolver.
         if (! $table->hasQuery() || $table->hasPivotRecordKeys() || $table->allowsDuplicates()) {
@@ -34,11 +35,11 @@ final class FilamentSelectionInspector
             throw UnsafeSelection::unsupported();
         }
 
-        if ($livewire->isTrackingDeselectedTableRecords) {
-            return $this->inspectAllMatching($livewire, $scope, $mayAct, $limit);
+        if ($state['isTrackingDeselectedTableRecords']) {
+            return $this->inspectAllMatching($livewire, $scope, $mayAct, $limit, $state['deselectedTableRecords']);
         }
 
-        $keys = $livewire->selectedTableRecords;
+        $keys = $state['selectedTableRecords'];
 
         if ($table->selectsCurrentPageOnly()) {
             $pageKeys = [];
@@ -71,7 +72,7 @@ final class FilamentSelectionInspector
     }
 
     /** @param callable(Model): bool $mayAct */
-    private function inspectAllMatching(HasTable $livewire, Builder $scope, callable $mayAct, int $limit): SelectionInspection
+    private function inspectAllMatching(HasTable $livewire, Builder $scope, callable $mayAct, int $limit, array $deselectedKeys): SelectionInspection
     {
         $table = $livewire->getTable();
 
@@ -81,9 +82,9 @@ final class FilamentSelectionInspector
 
         // A bounded scan prevents inverse selection from unexpectedly enumerating
         // the entire table. A future streaming resolver will handle larger sets.
-        $excludedKeys = $livewire->deselectedTableRecords === []
+        $excludedKeys = $deselectedKeys === []
             ? []
-            : ExplicitKeys::forModel($scope->getModel(), $livewire->deselectedTableRecords, $limit)->keys;
+            : ExplicitKeys::forModel($scope->getModel(), $deselectedKeys, $limit)->keys;
 
         $excluded = array_fill_keys($excludedKeys, true);
 
@@ -113,5 +114,38 @@ final class FilamentSelectionInspector
         }
 
         return $this->inspector->inspect($scope, $keys, $mayAct, $limit);
+    }
+
+    /**
+     * Filament's HasTable interface doesn't declare Livewire selection state.
+     * Inspect public component state explicitly rather than assuming the trait
+     * and its public properties are present on every HasTable implementation.
+     *
+     * @return array{
+     *     selectedTableRecords: array<array-key, mixed>,
+     *     deselectedTableRecords: array<array-key, mixed>,
+     *     isTrackingDeselectedTableRecords: bool
+     * }
+     */
+    private function readSelectionState(HasTable $livewire): array
+    {
+        $state = get_object_vars($livewire);
+
+        if (
+            ! isset($state['selectedTableRecords']) ||
+            ! is_array($state['selectedTableRecords']) ||
+            ! isset($state['deselectedTableRecords']) ||
+            ! is_array($state['deselectedTableRecords']) ||
+            ! isset($state['isTrackingDeselectedTableRecords']) ||
+            ! is_bool($state['isTrackingDeselectedTableRecords'])
+        ) {
+            throw UnsafeSelection::unsupported();
+        }
+
+        return [
+            'selectedTableRecords' => $state['selectedTableRecords'],
+            'deselectedTableRecords' => $state['deselectedTableRecords'],
+            'isTrackingDeselectedTableRecords' => $state['isTrackingDeselectedTableRecords'],
+        ];
     }
 }
