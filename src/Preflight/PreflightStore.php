@@ -98,7 +98,7 @@ final class PreflightStore
         $previous = null;
 
         foreach ($keys as $key) {
-            if (! is_string($key) || $key === '' || strlen($key) > 191) {
+            if (self::invalidStoredKey($key)) {
                 throw UnsafeSelection::invalid();
             }
 
@@ -112,5 +112,14 @@ final class PreflightStore
         if (! hash_equals($inspection->selectionDigest, hash('sha256', json_encode($keys, JSON_THROW_ON_ERROR)))) {
             throw UnsafeSelection::invalid();
         }
+    }
+
+    /**
+     * A JSON column can be tampered with independently of its PHPDoc type.
+     * Keep this runtime guard even when analysis regards recordKeys as strings.
+     */
+    private static function invalidStoredKey(mixed $key): bool
+    {
+        return ! is_string($key) || $key === '' || strlen($key) > 191;
     }
 }
