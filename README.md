@@ -153,7 +153,7 @@ Callbacks must be short-running, synchronous and database-only. Do not perform i
 
 ## Documentation and development
 
-[Implementation plan](IMPLEMENTATION_PLAN.md) · [Task board](TASKS.md) · [Selection compatibility](docs/selection-compatibility.md) · [Security model](docs/security-model.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [CI](.github/workflows/tests.yml)
+[Implementation plan](IMPLEMENTATION_PLAN.md) · [Task board](TASKS.md) · [Selection compatibility](docs/selection-compatibility.md) · [Security model](docs/security-model.md) · [Measured CI benchmarks](docs/benchmark-results-2026-10-17.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [CI](.github/workflows/tests.yml)
 
 To report a vulnerability, use a private GitHub Security Advisory if available. Do not publish exploit details in a public issue.
 
