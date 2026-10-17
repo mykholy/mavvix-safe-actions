@@ -37,12 +37,12 @@ final class SafeBulkAction
     ): BulkAction {
         return BulkAction::make($name)
             ->requiresConfirmation()
-            ->modalDescription('Review the verified record count before confirming. Permissions are checked again during execution.')
-            ->modalSubmitActionLabel('Confirm changes')
+            ->modalDescription(fn (): string => (string) __('safe-actions::messages.modal.description'))
+            ->modalSubmitActionLabel(fn (): string => (string) __('safe-actions::messages.modal.confirm'))
             ->schema([
                 Hidden::make('safe_action_ticket')->required(),
                 TextInput::make('safe_action_count')
-                    ->label('Records to change')
+                    ->label(fn (): string => (string) __('safe-actions::messages.modal.record_count'))
                     ->readOnly()
                     ->dehydrated(false),
             ])
@@ -55,7 +55,7 @@ final class SafeBulkAction
                     );
                 } catch (UnsafeSelection $exception) {
                     Notification::make()
-                        ->title('Unable to preview the selected records')
+                        ->title((string) __('safe-actions::messages.notifications.preview_failed'))
                         ->body($exception->getMessage())
                         ->danger()
                         ->send();
@@ -69,13 +69,13 @@ final class SafeBulkAction
                 ]);
             })
             ->action(function (array $data, HasTable $livewire) use ($context, $authorize, $mutate): void {
-                $ticketId = $data['safe_action_ticket'] ?? null;
-
-                if (! is_string($ticketId) || $ticketId === '') {
-                    throw UnsafeExecution::unavailable();
-                }
-
                 try {
+                    $ticketId = $data['safe_action_ticket'] ?? null;
+
+                    if (! is_string($ticketId) || $ticketId === '') {
+                        throw UnsafeExecution::unavailable();
+                    }
+
                     app(FilamentSafeActionWorkflow::class)->execute(
                         $livewire,
                         $ticketId,
@@ -85,7 +85,7 @@ final class SafeBulkAction
                     );
                 } catch (UnsafeSelection|UnsafeExecution $exception) {
                     Notification::make()
-                        ->title('Safe action was not executed')
+                        ->title((string) __('safe-actions::messages.notifications.execute_failed'))
                         ->body($exception->getMessage())
                         ->danger()
                         ->send();

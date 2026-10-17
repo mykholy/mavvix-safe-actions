@@ -110,6 +110,21 @@ $result = app(\Mavvix\SafeActions\Execution\GuardedExecutor::class)
 
 The third argument to PreflightStore::issue() binds the ticket to a query fingerprint. Omitting it intentionally creates a **read-only ticket that cannot be executed**.
 
+## Languages
+
+The native Filament confirmation and safety errors are translated into English
+and Arabic through Laravel's localization system. The current application locale
+is used; the package does not override your panel's language or text direction.
+
+To customize the strings:
+
+~~~bash
+php artisan vendor:publish --tag=safe-actions-translations
+~~~
+
+Edit the translated messages in the application's lang/vendor/safe-actions
+directory. These translations only change presentation, never authorization.
+
 ## Ticket retention
 
 Preflight tickets are short-lived, but their database rows are kept until pruned.
