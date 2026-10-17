@@ -17,4 +17,15 @@ These percentiles describe **20 sequential, single-process samples** on ephemera
 
 The php_process_peak_memory_bytes metric reports the PHP process's cumulative peak, not memory consumed solely by one action. sql_query_count includes package queries and is not a latency proxy.
 
+## Concurrent contention diagnostics (separate from sequential timings)
+
+The dedicated `ConcurrentLoadTest` runs only with `SAFE_ACTIONS_CONCURRENT_REPORT` set and requires `pcntl` plus a real MySQL/PostgreSQL database. Each fork explicitly reconnects its PDO session and starts on a filesystem barrier. The CI suite verifies:
+
+- Eight simultaneous confirmations of one ticket over 100 records; exactly one can commit.
+- Eight independently issued tickets for the same 100 records; no stale confirmation may commit.
+- Four confirmations of one ticket spanning 500 records (the current selection ceiling).
+- Four separate tenant scopes, each with 100 records; all four can commit without cross-tenant mutations.
+
+Each run asserts affected rows and consumed-ticket counts, and reports wall duration, per-worker timing and error classes to `safe-actions-concurrent-{mysql,postgres}` workflow artifacts. A run with unexpected results fails CI. These are short, synthetic CI workloads on small fixtures, without realistic production observers, hardware profiles or external user traffic. The recorded worker durations and wall times cannot be interpreted as load-tested P95/P99, throughput capacity, or performance guarantees.
+
 For reproducibility, use GitHub Actions with the recorded commit SHA and database driver. Do not interpret green CI as proof of a production latency SLO.
