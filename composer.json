@@ -1,14 +1,20 @@
 {
     "name": "mykholy/mavvix-safe-actions",
-    "description": "A fail-closed selection safety foundation for consequential Filament bulk actions.",
+    "description": "Fail-closed, tenant-aware Filament 5 bulk actions with verified selections, expiring preflights and transactional execution.",
     "type": "library",
     "license": "MIT",
     "keywords": [
         "laravel",
         "filament",
+        "filamentphp",
+        "filament-plugin",
         "bulk-actions",
+        "eloquent",
         "authorization",
-        "safety"
+        "multi-tenancy",
+        "transaction",
+        "preflight",
+        "data-safety"
     ],
     "require": {
         "php": "^8.2",
@@ -49,5 +55,18 @@
         "sort-packages": true
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "homepage": "https://github.com/mykholy/mavvix-safe-actions",
+    "authors": [
+        {
+            "name": "Ahmed Elkholy",
+            "homepage": "https://github.com/mykholy",
+            "role": "Maintainer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/mykholy/mavvix-safe-actions/issues",
+        "source": "https://github.com/mykholy/mavvix-safe-actions",
+        "security": "https://github.com/mykholy/mavvix-safe-actions/security/policy"
+    }
 }
