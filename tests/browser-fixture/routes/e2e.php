@@ -24,7 +24,6 @@ Route::get('/safe-actions-e2e-state', static function () {
     ]);
 });
 
-
 // Only installed by the disposable CI fixture, never registered by the package.
 Route::post('/safe-actions-e2e-expire', static function () {
     abort_unless(Auth::check(), 403);
