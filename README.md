@@ -110,6 +110,21 @@ $result = app(\Mavvix\SafeActions\Execution\GuardedExecutor::class)
 
 The third argument to PreflightStore::issue() binds the ticket to a query fingerprint. Omitting it intentionally creates a **read-only ticket that cannot be executed**.
 
+## Ticket retention
+
+Preflight tickets are short-lived, but their database rows are kept until pruned.
+Schedule the built-in command in your Laravel application to prevent unbounded growth:
+
+~~~bash
+php artisan safe-actions:prune-preflights
+php artisan safe-actions:prune-preflights --hours=48
+~~~
+
+The default retention is **24 hours after expiration or consumption**. The
+command never deletes a currently valid, unconsumed ticket. It is not scheduled
+automatically; add it to your application's Laravel scheduler as appropriate.
+Do not treat these short-lived tickets as an immutable audit trail.
+
 ## Guarantees and limitations
 
 - Revalidates selection identity, filtered query, actor/tenant context and per-record eligibility at execution.
