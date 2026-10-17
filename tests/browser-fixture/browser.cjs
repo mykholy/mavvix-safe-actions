@@ -22,6 +22,26 @@ const AxeBuilder = require('@axe-core/playwright').default;
         });
     };
 
+    // The built-in PHP test server occasionally resets a direct inspection
+    // request while a Livewire request is settling. Retry transport failures
+    // only; never mask non-2xx responses or incorrect business state.
+    const readState = async () => {
+        for (let attempt = 0; attempt < 4; attempt++) {
+            try {
+                const response = await page.request.get(base + '/safe-actions-e2e-state', { timeout: 10000 });
+                if (!response.ok()) {
+                    throw new Error('State inspection returned HTTP ' + response.status());
+                }
+                return await response.json();
+            } catch (error) {
+                if (!/ECONNRESET|ECONNREFUSED|socket hang up/.test(String(error)) || attempt === 3) {
+                    throw error;
+                }
+                await page.waitForTimeout(250 * (attempt + 1));
+            }
+        }
+    };
+
     page.on('pageerror', error => failures.push(error.message));
 
     try {
@@ -80,7 +100,7 @@ const AxeBuilder = require('@axe-core/playwright').default;
 
 
         await page.getByRole('button', { name: /Cancel/i }).last().click();
-        const afterCancel = await (await page.request.get(base + '/safe-actions-e2e-state')).json();
+        const afterCancel = await readState();
 
         if (afterCancel.rows[0].status !== 'pending' || afterCancel.consumed !== 0) {
             throw new Error('Cancelling the modal changed a row or consumed a ticket.');
@@ -91,16 +111,16 @@ const AxeBuilder = require('@axe-core/playwright').default;
         await page.getByText('Records to change').waitFor({ timeout: 15000 });
         await page.keyboard.press('Escape');
         await page.getByText('Records to change').waitFor({ state: 'hidden', timeout: 15000 });
-        const afterEscape = await (await page.request.get(base + '/safe-actions-e2e-state')).json();
+        const afterEscape = await readState();
         if (afterEscape.rows[0].status !== 'pending' || afterEscape.consumed !== 0) {
             throw new Error('Escape-cancel changed a row or consumed a ticket.');
         }
 
         await page.getByRole('button', { name: /Archive selected/i }).click();
         await page.getByRole('button', { name: /Confirm changes/i }).click();
-        await page.waitForTimeout(500);
+        await page.getByText('Records to change').waitFor({ state: 'hidden', timeout: 15000 });
 
-        const afterConfirm = await (await page.request.get(base + '/safe-actions-e2e-state')).json();
+        const afterConfirm = await readState();
 
         if (afterConfirm.rows[0].status !== 'archived' || afterConfirm.rows[3].status !== 'pending' || afterConfirm.consumed !== 1) {
             throw new Error('Confirmation did not archive the exact scoped row once.');
@@ -154,7 +174,7 @@ const AxeBuilder = require('@axe-core/playwright').default;
         await page.getByRole('button', { name: /تأكيد التغييرات/ }).click();
         await page.getByText('لم يتم تنفيذ العملية').waitFor({ timeout: 15000 });
 
-        const expiredState = await (await page.request.get(base + '/safe-actions-e2e-state')).json();
+        const expiredState = await readState();
 
         if (expiredState.rows[1].status !== 'pending' || expiredState.consumed !== 1) {
             throw new Error('Expired confirmation altered records or consumed an invalid ticket.');
@@ -169,7 +189,7 @@ const AxeBuilder = require('@axe-core/playwright').default;
         await page.getByRole('button', { name: /Archive selected/i }).click();
         await page.getByText('Unable to preview the selected records').waitFor({ timeout: 15000 });
 
-        const deniedState = await (await page.request.get(base + '/safe-actions-e2e-state')).json();
+        const deniedState = await readState();
 
         if (deniedState.rows[2].status !== 'forbidden' || deniedState.tickets !== expiredState.tickets) {
             throw new Error('Unauthorized preview mutated a row or created a ticket.');
@@ -191,7 +211,7 @@ const AxeBuilder = require('@axe-core/playwright').default;
         }
         await page.screenshot({ path: path.join(output, 'declared-change-preview.png'), fullPage: true });
 
-        const plannedState = await (await page.request.get(base + '/safe-actions-e2e-state')).json();
+        const plannedState = await readState();
         if (plannedState.rows[1].status !== 'pending') {
             throw new Error('Read-only impact preview mutated the row before confirmation.');
         }

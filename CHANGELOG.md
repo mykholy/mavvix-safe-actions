@@ -28,6 +28,8 @@ All noteworthy changes will be documented here. Until the first stable release, 
 - Real Chromium English and Arabic Filament modal testing, including expired token and unauthorized row failure cases.
 - Automated axe-core WCAG scan of English desktop and Arabic dark/mobile modal, with no reported violations and one incomplete item in each run.
 - Explicit Composer security audit jobs for Laravel 12 and 13.
+- PHP 8.2 / Laravel 12 PHPUnit compatibility verified with PHPUnit 10, and a second clean-room Laravel 13 / PHP 8.4 host installation/guarded replay test.
+- Chromium automated keyboard focus containment, confirmation alertdialog semantics and Escape cancellation checks.
 - Reproducible single-run MySQL and PostgreSQL measurements for 1/100/500 records.
 - Warmed-up, sequential repeated microbenchmark harness (3 warmups + 20 measured runs per size and database) with empirical P50/P95/P99 reported as CI artifacts; not a concurrent workload claim.
 - Livewire, Testbench, security regression, PHPUnit and Laravel Pint CI coverage.
