@@ -10,31 +10,31 @@ final class UnsafeExecution extends RuntimeException
 {
     public static function unavailable(): self
     {
-        return new self('The preflight is missing, expired, already used or belongs to another context.');
+        return new self((string) __('safe-actions::messages.errors.unavailable'));
     }
 
     public static function unbound(): self
     {
-        return new self('This preflight was not bound to a resource query and cannot be executed.');
+        return new self((string) __('safe-actions::messages.errors.unbound'));
     }
 
     public static function scopeChanged(): self
     {
-        return new self('The permitted query changed after the preflight. Start a new preview.');
+        return new self((string) __('safe-actions::messages.errors.scope_changed'));
     }
 
     public static function selectionChanged(): self
     {
-        return new self('The selected records changed after the preflight. Start a new preview.');
+        return new self((string) __('safe-actions::messages.errors.selection_changed'));
     }
 
     public static function connectionMismatch(): self
     {
-        return new self('Preflight and selected records must use the same database connection.');
+        return new self((string) __('safe-actions::messages.errors.connection_mismatch'));
     }
 
     public static function unsupportedScope(): self
     {
-        return new self('A paginated or limited query cannot safely execute this selection.');
+        return new self((string) __('safe-actions::messages.errors.unsupported_scope'));
     }
 }

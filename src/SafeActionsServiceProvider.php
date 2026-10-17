@@ -16,9 +16,15 @@ final class SafeActionsServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->loadTranslationsFrom(__DIR__.'/../lang', 'safe-actions');
+
         if ($this->app->runningInConsole()) {
             $this->commands([PrunePreflightsCommand::class]);
         }
+
+        $this->publishes([
+            __DIR__.'/../lang' => lang_path('vendor/safe-actions'),
+        ], 'safe-actions-translations');
 
         $this->publishes([
             __DIR__.'/../config/safe-actions.php' => config_path('safe-actions.php'),
