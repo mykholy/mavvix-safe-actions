@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mavvix\SafeActions\Filament;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
@@ -39,6 +40,7 @@ final class SafeBulkAction
             ->requiresConfirmation()
             ->modalDescription(fn (): string => (string) __('safe-actions::messages.modal.description'))
             ->modalSubmitActionLabel(fn (): string => (string) __('safe-actions::messages.modal.confirm'))
+            ->modalSubmitAction(fn (Action $action): Action => $action->color('danger'))
             ->schema([
                 Hidden::make('safe_action_ticket')->required(),
                 TextInput::make('safe_action_count')
