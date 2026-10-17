@@ -10,6 +10,9 @@ All noteworthy changes will be documented here. Until the first stable release, 
 
 ### Added
 
+- Inverse selection now applies canonical deselection exclusions to the scoped SQL query before enforcing the 500-record ceiling, with a Livewire regression test.
+- Declarative updates refuse common ownership/tenant foreign keys by default and support additional host-defined protected columns, with regression coverage for malformed configuration.
+
 - Query-bound preflights now capture an optimistic fingerprint of selected model values and reject otherwise-authorized stale changes at confirmation; earlier tickets must be re-previewed after upgrade.
 - Regression tests for same-scope data drift, old ticket rejection and query projections that omit columns.
 - Explicit rejection of grouped, HAVING, DISTINCT and UNION queries; Livewire regression cases for global search with explicit and inverse selections.
