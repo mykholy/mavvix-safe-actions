@@ -25,8 +25,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('safe_action_preflights', function (Blueprint $table): void {
-            $table->dropColumn('record_state_digest');
-        });
+        // The base migration owns this column on fresh installations.
+        // Removing it here would break the table during an incremental rollback.
     }
 };

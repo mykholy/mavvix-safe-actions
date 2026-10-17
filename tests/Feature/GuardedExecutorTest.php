@@ -291,10 +291,11 @@ final class GuardedExecutorTest extends TestCase
         $scope = $this->scope(false)->select(['id', 'status']);
         $id = $this->issue([$order->getKey()], $scope);
 
-        // tenant_id is not in the host query's explicit projection.
-        $order->update(['tenant_id' => 2]);
+        // created_at is not in the host query's explicit projection.
+        $order->update(['created_at' => now()->subDay()]);
 
-        $this->expectException(UnsafeSelection::class);
+        $this->expectException(UnsafeExecution::class);
+        $this->expectExceptionMessage('One or more selected records changed since preview. Start a new preview.');
 
         $this->executor()->execute(
             $id,
