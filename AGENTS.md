@@ -4,7 +4,7 @@ This repository is for a high-trust, open-source Filament plugin. Read `IMPLEMEN
 
 ## Operating rules
 
-1. Work in small, reviewable increments in PR order PR-00 to PR-06. Do not declare the package production-ready or release a stable tag until all gates pass.
+1. Work in small, reviewable increments and pass all automated CI gates. For v1.0.0 the owner explicitly authorized a limited stable SemVer release with an identified first-party assessment; document outstanding independent/human audits and do not advertise external security sign-off or unconditional production safety. Future releases should close outstanding assurance issues.
 2. The most important property is **no unintended mutations**. When the selected target set cannot be proven, fail closed. An apparently successful action that reaches an unauthorized record is a critical defect.
 3. Implement a real host-app integration test before committing to a Filament selection adapter. Never rely on DOM hacks, undocumented Livewire state or reflection unless specifically justified and isolated behind tests; prefer to reject unsupported modes.
 4. Preserve Laravel authorization, global scopes, soft-delete behavior, Filament tenant boundaries and authenticated guard/panel context. Never bypass scoping to make counts match.
