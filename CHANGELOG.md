@@ -1,12 +1,16 @@
 # Changelog
 
-All noteworthy changes will be documented here. Until the first stable release, features may change without a backward-compatibility guarantee.
+All noteworthy changes are documented here. The v1.x public API follows semantic versioning within the explicitly supported Filament, Laravel and database constraints.
+
+## v1.0.1 — October 18, 2026
+
+Documentation and distribution-only patch: enhanced Composer package discovery metadata (maintainer, source, support links and keywords); clearer README badges, feature comparison, installation and security limitations; Packagist/Filament submission checklists and GitHub community templates. No runtime PHP or database schema changes.
 
 ## v1.0.0 — October 18, 2026
 
 First stable public SemVer API for guarded, synchronous Filament 5 bulk actions. The supported contract is bounded, Eloquent-backed and single-database only. Includes English/Arabic modal integration, signed first-party *textual* security review, real-driver multi-process concurrency tests, dependency audit and a same-SHA gated stable-release workflow. Not independently security-certified; manual screen-reader and representative production load reviews remain open.
 
-## Unreleased — historical pre-alpha work
+## Historical pre-alpha development (before v1.0.0)
 
 ### Changed
 
@@ -56,4 +60,4 @@ First stable public SemVer API for guarded, synchronous Filament 5 bulk actions.
 - Independent security review, broader lock-contention testing and scalability benchmarks.
 - Manual browser UX, keyboard navigation and screen-reader accessibility review.
 - Large-scale queued execution, audit history, impact diffs and rollback after successful commit.
-- Filament 4 support or a versioned stable compatibility contract.
+- Filament 4 support (not part of the current v1.x contract).
