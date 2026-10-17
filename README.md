@@ -92,6 +92,30 @@ Resolve the actor, guard, tenant and action key on the **server**. Never derive 
 
 The native action previews a **record count**, not a complete before/after data diff. It checks both the caller-supplied policy callback and the Filament row-selectability rule at confirmation.
 
+## Read-only declared change preview
+
+For common updates to a few scalar columns, use the optional declarative
+action. This uses the **same server-declared values** for both the before/after
+preview and the subsequent guarded mutation:
+
+~~~php
+SafeBulkAction::update(
+    name: 'archive',
+    context: $trustedContextResolver,
+    authorize: fn (Model $order): bool => Gate::allows('update', $order),
+    changes: ['status' => 'archived'],
+)->label('Archive selected');
+~~~
+
+The modal displays each declared column's previous value (or "multiple values"
+if the selection differs) and intended target value. It **does not run mutation
+code during preview**. The displayed fields are not a full database diff:
+model observers, casts, database triggers and external side effects may behave
+differently. The configured mutation cannot contain arbitrary callbacks; use
+the custom action when you need complex behavior. Protected identifiers,
+tenant_id and timestamp fields are refused in the declarative API. Always
+review Eloquent observers before using either action in a real application.
+
 ## Headless API
 
 ~~~php

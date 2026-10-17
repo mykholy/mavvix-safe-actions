@@ -133,6 +133,21 @@ const AxeBuilder = require('@axe-core/playwright').default;
 
         await page.screenshot({ path: path.join(output, 'unauthorized-selection.png'), fullPage: true });
 
+        await page.goto(base + '/safe-actions-e2e', { waitUntil: 'networkidle' });
+        const plannedRow = page.locator('tbody tr').filter({ hasText: 'Pending Two' });
+        await plannedRow.locator('input[type="checkbox"]').check({ force: true });
+        await page.getByRole('button', { name: /Archive with preview/i }).click();
+        await page.getByText('Declared changes (read-only)').waitFor({ timeout: 15000 });
+        await page.getByText('Status: pending → archived').waitFor({ timeout: 15000 });
+        await page.screenshot({ path: path.join(output, 'declared-change-preview.png'), fullPage: true });
+
+        const plannedState = await (await page.request.get(base + '/safe-actions-e2e-state')).json();
+        if (plannedState.rows[1].status !== 'pending') {
+            throw new Error('Read-only impact preview mutated the row before confirmation.');
+        }
+
+        await page.getByRole('button', { name: /Cancel/i }).last().click();
+
         if (failures.length) {
             throw new Error('Browser JavaScript errors: ' + JSON.stringify(failures));
         }
