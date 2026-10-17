@@ -64,4 +64,34 @@ final class DeclaredChangePreviewTest extends TestCase
 
         DeclaredChangePreview::validate(['status' => ['archived']]);
     }
+
+    public function test_declared_update_rejects_common_ownership_columns(): void
+    {
+        foreach (['organization_id', 'workspace_id', 'team_id', 'account_id', 'company_id', 'owner_id'] as $column) {
+            try {
+                DeclaredChangePreview::validate([$column => 2]);
+                self::fail("A declared update must reject ownership column [{$column}].");
+            } catch (InvalidArgumentException $exception) {
+                self::assertSame('Declared update contains an unsupported field or value.', $exception->getMessage());
+            }
+        }
+    }
+
+    public function test_declared_update_respects_host_specific_protected_columns(): void
+    {
+        config()->set('safe-actions.protected_update_columns', ['branch_id']);
+
+        DeclaredChangePreview::validate(['status' => 'archived']);
+
+        $this->expectException(InvalidArgumentException::class);
+        DeclaredChangePreview::validate(['branch_id' => 999]);
+    }
+
+    public function test_malformed_protected_columns_config_fails_closed(): void
+    {
+        config()->set('safe-actions.protected_update_columns', 'branch_id');
+
+        $this->expectException(InvalidArgumentException::class);
+        DeclaredChangePreview::validate(['status' => 'archived']);
+    }
 }

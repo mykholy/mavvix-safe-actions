@@ -88,15 +88,22 @@ final class FilamentSelectionInspector
             ? []
             : ExplicitKeys::forModel($scope->getModel(), $deselectedKeys, $limit)->keys;
 
-        $excluded = array_fill_keys($excludedKeys, true);
-
         // A caller-defined offset or limit would silently change what "all" means.
         if ($scope->getQuery()->offset !== null || $scope->getQuery()->limit !== null) {
             throw UnsafeSelection::unsupported();
         }
 
+        // Apply explicit exclusions before the bounded scan. Otherwise a
+        // 501-row query with two deselections incorrectly fails the 500-row
+        // selection ceiling even though only 499 records are selected.
+        $query = clone $scope;
+
+        if ($excludedKeys !== []) {
+            $query->whereNotIn($scope->getModel()->getQualifiedKeyName(), $excludedKeys);
+        }
+
         $records = Model::withoutEvents(
-            fn () => (clone $scope)->limit($limit + 1)->get(),
+            fn () => $query->limit($limit + 1)->get(),
         );
 
         if ($records->count() > $limit) {
@@ -106,7 +113,7 @@ final class FilamentSelectionInspector
         $keys = [];
 
         foreach ($records as $record) {
-            if (isset($excluded[(string) $record->getKey()]) || ! $table->isRecordSelectable($record)) {
+            if (! $table->isRecordSelectable($record)) {
                 continue;
             }
 

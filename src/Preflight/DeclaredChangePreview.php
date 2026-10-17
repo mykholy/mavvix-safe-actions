@@ -28,11 +28,21 @@ final class DeclaredChangePreview
             throw new InvalidArgumentException('Declare between one and eight scalar fields to preview.');
         }
 
+        $protected = config('safe-actions.protected_update_columns', []);
+
+        if (
+            ! is_array($protected) ||
+            array_filter($protected, static fn (mixed $column): bool => ! is_string($column)) !== []
+        ) {
+            throw new InvalidArgumentException('Protected update columns must be an array of column names.');
+        }
+
         foreach ($changes as $field => $value) {
             if (
                 ! is_string($field) ||
                 ! preg_match('/^[a-z][a-z0-9_]*$/D', $field) ||
                 in_array($field, ['id', 'tenant_id', 'created_at', 'updated_at', 'deleted_at'], true) ||
+                in_array($field, $protected, true) ||
                 (! is_null($value) && ! is_scalar($value)) ||
                 (is_string($value) && strlen($value) > 2000)
             ) {
