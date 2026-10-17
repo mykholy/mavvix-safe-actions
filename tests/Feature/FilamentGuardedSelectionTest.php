@@ -172,4 +172,24 @@ final class FilamentGuardedSelectionTest extends TestCase
             ->assertSet('inspectedCount', null)
             ->assertSet('inspectionError', 'One or more selected records are not authorized.');
     }
+
+    public function test_inverse_selection_applies_deselections_before_the_safe_limit(): void
+    {
+        $deselected = [];
+
+        foreach (range(1, 501) as $index) {
+            $order = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+
+            if ($index <= 2) {
+                $deselected[] = $order->getKey();
+            }
+        }
+
+        Livewire::test(GuardedOrdersTable::class)
+            ->set('isTrackingDeselectedTableRecords', true)
+            ->set('deselectedTableRecords', $deselected)
+            ->call('inspectSelection')
+            ->assertSet('inspectedCount', 499)
+            ->assertSet('inspectionError', null);
+    }
 }
