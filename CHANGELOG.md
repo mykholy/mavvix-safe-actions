@@ -26,6 +26,7 @@ All noteworthy changes will be documented here. Until the first stable release, 
 - Automated axe-core WCAG scan of English desktop and Arabic dark/mobile modal, with no reported violations and one incomplete item in each run.
 - Explicit Composer security audit jobs for Laravel 12 and 13.
 - Reproducible single-run MySQL and PostgreSQL measurements for 1/100/500 records.
+- Warmed-up, sequential repeated microbenchmark harness (3 warmups + 20 measured runs per size and database) with empirical P50/P95/P99 reported as CI artifacts; not a concurrent workload claim.
 - Livewire, Testbench, security regression, PHPUnit and Laravel Pint CI coverage.
 - MySQL 8.4 and PostgreSQL 16 functional test jobs in CI.
 - Independent-process parallel ticket replay and stale-scope regression coverage for MySQL and PostgreSQL.
