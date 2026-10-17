@@ -1,0 +1,26 @@
+name: Feature request
+description: Propose a change to supported selection modes or the developer API.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Use case
+      description: Which real workflow needs this behavior?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API or experience
+      description: Include code examples when useful.
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Scope, authorization and rollback implications
+      description: Explain how the proposal preserves exact selection and fail-closed behavior.
+    validations:
+      required: true
