@@ -4,12 +4,13 @@ The project favors clear, narrowly scoped changes over abstractions that cannot 
 
 ## Development
 
-Use PHP 8.3+ with the Laravel/Filament versions in the GitHub Actions matrix.
+Use a supported PHP runtime (8.2–8.4 in the current CI matrix), together with compatible Laravel 12/13 and Filament 5 packages.
 
 ~~~bash
 composer install
 vendor/bin/phpunit
 vendor/bin/pint --test
+vendor/bin/phpstan analyse --no-progress --memory-limit=1G
 ~~~
 
 Keep one behavior change per pull request where practical. Add a regression test for every reported scope or authorization bug. Use Laravel's conventions, strict types and descriptive domain names. Avoid suppressing static-analysis issues without explanation.
@@ -24,7 +25,7 @@ Keep one behavior change per pull request where practical. Add a regression test
 - Do exceptions roll back the ticket and all database mutations?
 - Could a closure cause external, cross-connection or irreversible side effects?
 - Are any selection modes unsupported? Document them and fail closed.
-- Do both Laravel CI matrix jobs pass?
+- Do all PHP/Laravel CI jobs, MySQL/PostgreSQL concurrency tests, browser E2E, static analysis, dependency audit and clean host installation pass?
 
 Do not change the advertised version matrix or tag stable without working integration tests for the claim. Use a Draft PR for changes that still have unverified invariants.
 
