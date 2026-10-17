@@ -134,7 +134,7 @@ final class RepeatedPerformanceBenchmarkTest extends TestCase
     /**
      * Nearest-rank empirical quantiles, deliberately not a fitted distribution.
      *
-     * @param list<float> $values
+     * @param  list<float>  $values
      * @return array{p50: float, p95: float, p99: float, min: float, max: float}
      */
     private static function quantiles(array $values): array
