@@ -13,8 +13,8 @@ jobs:
     name: Chromium / real Filament table and modal
     runs-on: ubuntu-latest
     env:
-      SAFE_ACTIONS_HOST_PATH: ${{ runner.temp }}/browser-host
-      SAFE_ACTIONS_SCREENSHOTS: ${{ runner.temp }}/safe-actions-browser-screenshots
+      SAFE_ACTIONS_HOST_PATH: /tmp/mavvix-safe-actions-browser-host
+      SAFE_ACTIONS_SCREENSHOTS: /tmp/safe-actions-browser-screenshots
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
