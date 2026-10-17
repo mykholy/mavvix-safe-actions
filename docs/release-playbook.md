@@ -1,6 +1,8 @@
 # Stable release playbook — Mavvix Safe Actions
 
-This is a reproducible handoff to release reviewers, not evidence that a release has been approved.
+**October 18, 2026 decision:** The owner explicitly authorized a narrowly scoped v1.0.0 stable SemVer release with an accurately disclosed **first-party (non-independent) assessment**, rather than waiting for an external auditor. The [first-party review](security-review-v1.0.0.md) records known residual risks; [issue #6](https://github.com/mykholy/mavvix-safe-actions/issues/6) and [issue #5](https://github.com/mykholy/mavvix-safe-actions/issues/5) remain open for external and human verification. No human or third-party signature is claimed.
+
+The v1.0.0 publishing workflow creates an annotated tag and a GitHub release only when the same final `main` commit has green Tests, Static analysis, Dependency security audit, Fresh host installation and Browser end-to-end runs. It must refuse failures, incomplete checks and a moved `main` branch. A passed release workflow is a reproducible release gate, **not** a security certification.
 
 ## 1. Freeze the release candidate
 
@@ -37,8 +39,8 @@ Automated Chromium/axe checks cover EN desktop and AR dark/mobile. The browser t
 
 1. Agree on the compatibility table, migration path, security findings and documentation of unsupported behavior.
 2. Tag a reviewed release candidate, perform an independent clean-room install, and record any fixes in new commits and rerun all gates.
-3. Publish an annotated stable tag only once the final candidate is green and **approved**.
+3. Publish an annotated stable tag only once the final candidate is green and the maintainer has authorized publication. v1.0.0 has the explicit owner-directed exception disclosed above; subsequent releases should aim to close external review gates.
 4. Submit to Packagist, verify exact version installation and installation metadata, and prepare a Filament Plugins listing with authentic screenshots and no unproven performance/safety claims.
 5. Add a clear changelog entry, upgrade instructions, compatibility support policy and vulnerability reporting process.
 
-Do **not** silently replace missing external reviews with green CI or mark the package stable before these checks. The package remains pre-alpha until an approved release is evidenced.
+Do **not** silently replace missing external reviews with green CI. The user-authorized v1.0.0 exception above is explicitly documented and signed as **first-party only**; that exception does not close independent security, accessibility or production load assurance issues, which remain recommended before high-stakes production deployments.
