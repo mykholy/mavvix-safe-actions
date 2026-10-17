@@ -1,0 +1,29 @@
+name: Static analysis
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  larastan:
+    name: Larastan / PHP 8.3 / Laravel 12
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, pdo_sqlite, dom, xml, zip
+          tools: composer:v2
+          coverage: none
+      - name: Install dependencies
+        run: |
+          composer validate --strict
+          composer require --no-interaction --no-update --dev "laravel/framework:^12.0" "orchestra/testbench:^10.0"
+          composer update --prefer-dist --no-interaction --no-progress --with-all-dependencies
+      - name: Analyse source
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
