@@ -20,9 +20,14 @@
 - [ ] Field-by-field read-only impact diff
 - [x] Atomic bounded database mutation and revalidation (SQLite CI)
 - [x] Sequential duplicate-submission, stale-scope, revoked-policy and rollback tests
-- [ ] Two-session concurrency tests on MySQL and PostgreSQL
+- [x] Two-process duplicate confirmation and stale-scope regression tests on MySQL and PostgreSQL
+- [ ] Forced process-termination and broader concurrency-fault tests
 - [x] CI test matrix on SQLite, MySQL 8.4 and PostgreSQL 16
-- [ ] Benchmarks and translated UI
+- [x] Larastan/PHPStan level 5 analysis on CI without suppression baseline
+- [x] Native modal and exception translations in English and Arabic
+- [x] Configurable pruning command for old preflight tickets
+- [x] Reject changes to current selected rows after preview
+- [ ] Real-driver performance benchmarks for 1, 100 and 500 records
 - [ ] Independent security review, accessibility/browser validation and release documentation
 
 **Release status: pre-alpha.** Do not tag v1.0.0 until all gates in `IMPLEMENTATION_PLAN.md` are satisfied.

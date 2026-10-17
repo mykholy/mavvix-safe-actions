@@ -15,10 +15,15 @@ All noteworthy changes will be documented here. Until the first stable release, 
 - Native Filament bulk action with a confirmation modal and verified record count.
 - Livewire, Testbench, security regression, PHPUnit and Laravel Pint CI coverage.
 - MySQL 8.4 and PostgreSQL 16 functional test jobs in CI.
+- Independent-process parallel ticket replay and stale-scope regression coverage for MySQL and PostgreSQL.
+- Mandatory Larastan/PHPStan level 5 CI gate with typed Eloquent preflight records.
+- Extra confirmation guard that rejects changed Livewire selection even when filters remain unchanged.
+- Pruning command for expired and consumed preflight tickets with a configurable retention period.
+- English and Arabic modal, notification and error messages, with a translator-free fallback for unit tests.
 
 ### Not yet complete
 
-- Independent security review and MySQL/PostgreSQL parallel-submission testing.
+- Independent security review, forced process-crash and broader concurrency tests.
 - Full browser UX and accessibility review.
 - Large-scale queued execution, audit history, impact diffs and rollback after successful commit.
 - Filament 4 support or a versioned stable compatibility contract.
