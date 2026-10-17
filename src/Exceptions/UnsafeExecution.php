@@ -23,6 +23,11 @@ final class UnsafeExecution extends RuntimeException
         return new self('The permitted query changed after the preflight. Start a new preview.');
     }
 
+    public static function selectionChanged(): self
+    {
+        return new self('The selected records changed after the preflight. Start a new preview.');
+    }
+
     public static function connectionMismatch(): self
     {
         return new self('Preflight and selected records must use the same database connection.');

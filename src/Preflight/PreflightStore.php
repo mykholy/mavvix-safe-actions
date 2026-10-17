@@ -7,6 +7,7 @@ namespace Mavvix\SafeActions\Preflight;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use Mavvix\SafeActions\Exceptions\UnsafeExecution;
 use Mavvix\SafeActions\Exceptions\UnsafeSelection;
 use Mavvix\SafeActions\Selection\SelectionInspection;
 
@@ -53,7 +54,7 @@ final class PreflightStore
         return new PreflightTicket($id, $inspection->recordCount, $expiresAt);
     }
 
-    public function read(string $id, PreflightContext $context): ?SelectionInspection
+    public function read(string $id, PreflightContext $context, ?Builder $permittedScope = null): ?SelectionInspection
     {
         $snapshot = SafeActionPreflight::query()
             ->whereKey($id)
@@ -70,6 +71,16 @@ final class PreflightStore
 
         if (! $snapshot) {
             return null;
+        }
+
+        if ($permittedScope !== null) {
+            if ($snapshot->scope_digest === null) {
+                throw UnsafeExecution::unbound();
+            }
+
+            if (! hash_equals($snapshot->scope_digest, ($this->fingerprint ?? new ScopeFingerprint)->forQuery($permittedScope))) {
+                throw UnsafeExecution::scopeChanged();
+            }
         }
 
         $inspection = new SelectionInspection(

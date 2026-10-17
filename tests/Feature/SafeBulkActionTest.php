@@ -36,6 +36,24 @@ final class SafeBulkActionTest extends TestCase
         self::assertSame('pending', $foreign->fresh()->status);
     }
 
+    public function test_modal_rejects_changed_selection_after_mount(): void
+    {
+        $original = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+        $replacement = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+
+        $component = Livewire::test(GuardedOrdersTable::class)
+            ->set('selectedTableRecords', [$original->getKey()])
+            ->call('mountTableBulkAction', 'safe_archive');
+
+        $component->set('selectedTableRecords', [$replacement->getKey()])
+            ->call('callMountedTableBulkAction')
+            ->assertHasNoErrors();
+
+        self::assertSame('pending', $original->fresh()->status);
+        self::assertSame('pending', $replacement->fresh()->status);
+        $this->assertDatabaseCount('safe_action_preflights', 1);
+    }
+
     public function test_action_modal_does_not_execute_unauthorized_selection(): void
     {
         $locked = ProbeOrder::create(['tenant_id' => 1, 'status' => 'locked']);

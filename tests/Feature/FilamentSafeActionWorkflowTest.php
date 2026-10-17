@@ -67,6 +67,47 @@ final class FilamentSafeActionWorkflowTest extends TestCase
         self::assertSame('locked', $two->fresh()->status);
     }
 
+    public function test_changing_selected_rows_after_preview_blocks_confirmation(): void
+    {
+        $one = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+        $two = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+
+        $component = Livewire::test(GuardedOrdersTable::class)
+            ->set('selectedTableRecords', [$one->getKey()])
+            ->call('previewSafeArchive');
+
+        $ticket = $component->get('safeTicketId');
+        self::assertNotEmpty($ticket);
+
+        $component->set('selectedTableRecords', [$two->getKey()])
+            ->call('executeSafeArchive')
+            ->assertSet('safeExecutedCount', null)
+            ->assertSet('safeActionError', 'The selected records changed after the preflight. Start a new preview.');
+
+        self::assertSame('pending', $one->fresh()->status);
+        self::assertSame('pending', $two->fresh()->status);
+        self::assertNull(SafeActionPreflight::findOrFail($ticket)->consumed_at);
+    }
+
+    public function test_clearing_selection_after_preview_cannot_execute_old_ticket(): void
+    {
+        $order = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+
+        $component = Livewire::test(GuardedOrdersTable::class)
+            ->set('selectedTableRecords', [$order->getKey()])
+            ->call('previewSafeArchive');
+
+        $ticket = $component->get('safeTicketId');
+        self::assertNotEmpty($ticket);
+
+        $component->set('selectedTableRecords', [])
+            ->call('executeSafeArchive')
+            ->assertSet('safeExecutedCount', null);
+
+        self::assertSame('pending', $order->fresh()->status);
+        self::assertNull(SafeActionPreflight::findOrFail($ticket)->consumed_at);
+    }
+
     public function test_changing_filament_filters_after_preview_blocks_confirmation(): void
     {
         $row = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
