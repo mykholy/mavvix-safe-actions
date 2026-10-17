@@ -8,6 +8,7 @@ use BladeUI\Heroicons\BladeHeroiconsServiceProvider;
 use BladeUI\Icons\BladeIconsServiceProvider;
 use Filament\Actions\ActionsServiceProvider;
 use Filament\FilamentServiceProvider;
+use Filament\Forms\FormsServiceProvider;
 use Filament\Schemas\SchemasServiceProvider;
 use Filament\Support\SupportServiceProvider;
 use Filament\Tables\TablesServiceProvider;
@@ -38,6 +39,7 @@ abstract class TestCase extends OrchestraTestCase
             BladeHeroiconsServiceProvider::class,
             LivewireServiceProvider::class,
             FilamentServiceProvider::class,
+            FormsServiceProvider::class,
             SupportServiceProvider::class,
             ActionsServiceProvider::class,
             SchemasServiceProvider::class,

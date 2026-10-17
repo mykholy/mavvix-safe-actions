@@ -17,6 +17,7 @@ All noteworthy changes will be documented here. Until the first stable release, 
 - Database-backed preflight tickets with identity, scope fingerprint, expiration and single-use semantics.
 - Transactional guarded executor with row revalidation, record locking where supported, and rollback on callback failure.
 - Native Filament bulk action with a confirmation modal and verified record count.
+- Optional developer-declared scalar updates with a bounded, read-only previous-to-target field preview.
 - Livewire, Testbench, security regression, PHPUnit and Laravel Pint CI coverage.
 - MySQL 8.4 and PostgreSQL 16 functional test jobs in CI.
 - Independent-process parallel ticket replay and stale-scope regression coverage for MySQL and PostgreSQL.

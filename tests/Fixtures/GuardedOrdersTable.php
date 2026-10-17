@@ -57,6 +57,12 @@ final class GuardedOrdersTable extends Component implements HasActions, HasSchem
                         $record->save();
                     },
                 ),
+                SafeBulkAction::update(
+                    'safe_declared_archive',
+                    fn (HasTable $livewire): PreflightContext => $this->actionContext(),
+                    fn (Model $record): bool => $record->status === 'pending',
+                    ['status' => 'archived'],
+                )->label('Archive with preview'),
             ])
             ->selectCurrentPageOnly($this->currentPageOnly)
             ->filters([

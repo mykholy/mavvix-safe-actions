@@ -58,6 +58,21 @@ final class SafeActionsDemo extends Component implements HasActions, HasSchemas,
                         $record->save();
                     },
                 )->label('Archive selected'),
+                SafeBulkAction::update(
+                    'archive_with_preview',
+                    static function (HasTable $component): PreflightContext {
+                        return new PreflightContext(
+                            actorType: 'user',
+                            actorId: (string) Auth::id(),
+                            guard: 'web',
+                            actionKey: 'archive',
+                            tenantType: 'tenant',
+                            tenantId: '1',
+                        );
+                    },
+                    static fn (Model $record): bool => $record->status === 'pending',
+                    ['status' => 'archived'],
+                )->label('Archive with preview'),
             ])
             ->checkIfRecordIsSelectableUsing(static fn (BrowserOrder $record): bool => $record->status !== 'locked');
     }
