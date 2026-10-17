@@ -83,7 +83,7 @@ jobs:
         run: vendor/bin/phpunit
       - name: Verify independent MySQL transactions
         run: vendor/bin/phpunit --filter ConcurrentExecutionTest --fail-on-skipped
-      - name: Benchmark bounded MySQL operations
+      - name: Benchmark bounded MySQL operations (single and repeated)
         env:
           SAFE_ACTIONS_BENCHMARK_REPORT: ${{ runner.temp }}/safe-actions-bench-mysql.jsonl
         run: vendor/bin/phpunit --filter PerformanceBenchmarkTest --fail-on-skipped
@@ -135,7 +135,7 @@ jobs:
         run: vendor/bin/phpunit
       - name: Verify independent PostgreSQL transactions
         run: vendor/bin/phpunit --filter ConcurrentExecutionTest --fail-on-skipped
-      - name: Benchmark bounded PostgreSQL operations
+      - name: Benchmark bounded PostgreSQL operations (single and repeated)
         env:
           SAFE_ACTIONS_BENCHMARK_REPORT: ${{ runner.temp }}/safe-actions-bench-postgres.jsonl
         run: vendor/bin/phpunit --filter PerformanceBenchmarkTest --fail-on-skipped

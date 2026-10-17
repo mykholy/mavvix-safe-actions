@@ -32,7 +32,8 @@
 - [x] Reject changes to current selected rows after preview
 - [x] Reject changes to persisted selected model values between preview and confirmation, including same-scope updates
 - [x] Single-run MySQL/PostgreSQL microbenchmarks for 1, 100 and 500 records, archived as CI artifacts
-- [ ] Representative warmed-up throughput and percentile benchmarks with concurrency load
+- [x] Repeated warmed-up sequential microbenchmarks with empirical P50/P95/P99 exported in CI (20 samples per case)
+- [ ] Independent representative throughput/percentile benchmarks under concurrency load
 - [x] Drop security-EOL Laravel 11 from Composer compatibility constraints
 - [x] Fresh Laravel 12 Composer install + migration + guarded execution smoke test
 - [x] Real Chromium modal cancel, confirm, expired-token, unauthorized-row, English/Arabic and mobile-dark checks
