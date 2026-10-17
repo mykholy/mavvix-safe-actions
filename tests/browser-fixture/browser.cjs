@@ -9,7 +9,8 @@ const AxeBuilder = require('@axe-core/playwright').default;
     fs.mkdirSync(output, { recursive: true });
 
     const browser = await chromium.launch({ headless: true });
-    const page = await browser.newPage({ viewport: { width: 1280, height: 850 } });
+    const context = await browser.newContext({ viewport: { width: 1280, height: 850 } });
+    const page = await context.newPage();
     const failures = [];
 
     page.on('pageerror', error => failures.push(error.message));
