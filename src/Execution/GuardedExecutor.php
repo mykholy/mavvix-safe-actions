@@ -90,12 +90,16 @@ final class GuardedExecutor
             );
 
             // Re-read and lock the actual rows, not objects cached during preview.
-            $records = (clone $permittedScope)
-                ->whereKey($requested->keys)
-                ->addSelect($model->qualifyColumn('*'))
-                ->orderBy($model->getQualifiedKeyName())
-                ->lockForUpdate()
-                ->get();
+            // Suppress "retrieved" hooks only while hydrating locked rows.
+            // Saving the mutated records below must still dispatch normal events.
+            $records = Model::withoutEvents(
+                fn () => (clone $permittedScope)
+                    ->whereKey($requested->keys)
+                    ->addSelect($model->qualifyColumn('*'))
+                    ->orderBy($model->getQualifiedKeyName())
+                    ->lockForUpdate()
+                    ->get(),
+            );
 
             if ($records->count() !== $requested->count()) {
                 throw UnsafeSelection::scopeMismatch();

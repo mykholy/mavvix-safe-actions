@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mavvix\SafeActions\Preflight;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Mavvix\SafeActions\Exceptions\UnsafeSelection;
@@ -58,7 +59,9 @@ final class DeclaredChangePreview
             throw UnsafeSelection::unsupported();
         }
 
-        $records = (clone $scope)->whereKey($inspection->recordKeys)->get();
+        $records = Model::withoutEvents(
+            fn () => (clone $scope)->whereKey($inspection->recordKeys)->get(),
+        );
 
         if ($records->count() !== $inspection->recordCount) {
             throw UnsafeSelection::scopeMismatch();

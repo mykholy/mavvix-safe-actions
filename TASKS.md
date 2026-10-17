@@ -16,6 +16,7 @@
 ## PR-01 onward
 
 - [x] Read-only persisted preflight snapshot with actor/tenant/action binding and expiry (CI tested)
+- [x] Ensure package-owned read-only hydration never dispatches Eloquent retrieved events; preserve mutation lifecycle events
 - [x] One-time consumption and execution-time scope/permission revalidation (CI tested)
 - [x] Native Filament action modal with verified record count (CI tested)
 - [x] Bounded read-only old-to-new field summaries for explicitly developer-declared scalar updates

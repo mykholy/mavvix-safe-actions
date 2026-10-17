@@ -10,7 +10,7 @@ The design goal is **no unexpected record mutations**, not to replace Laravel po
 
 ## Preview invariant
 
-The inspector rejects unsafe SQL query shapes (including global-scope joins, aliases, grouping, and unions) before it validates a canonical key list and resolves it against the live, filtered Eloquent query. It rejects missing, foreign-tenant and unauthorized rows. The Filament adapter also checks row selectability and denies unsupported pivot/non-Eloquent modes.
+The inspector rejects unsafe SQL query shapes (including global-scope joins, aliases, grouping, and unions) before it validates a canonical key list and resolves it against the live, filtered Eloquent query. All package-owned Eloquent hydration during inspection, fingerprinting, declared preview and execution is wrapped in `Model::withoutEvents` so `retrieved` observers do not introduce side effects. Mutation-time `saving`/`updated` observers are intentionally **not** suppressed and must be reviewed for external effects. Filament's table itself may hydrate models outside the package, and host-provided policy callbacks must be pure. It rejects missing, foreign-tenant and unauthorized rows. The Filament adapter also checks row selectability and denies unsupported pivot/non-Eloquent modes.
 
 The resulting preflight ticket persists the exact IDs, digest, actor, guard, tenant, panel and action. A *query-bound* ticket additionally persists a SHA-256 fingerprint of the model, database connection, SQL and bindings, plus a digest of the selected model's persisted attributes. Tickets without either fingerprint are **not executable**. The state digest is an optimistic concurrency check, not an immutable audit trail or an HMAC.
 

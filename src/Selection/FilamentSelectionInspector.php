@@ -95,7 +95,9 @@ final class FilamentSelectionInspector
             throw UnsafeSelection::unsupported();
         }
 
-        $records = (clone $scope)->limit($limit + 1)->get();
+        $records = Model::withoutEvents(
+            fn () => (clone $scope)->limit($limit + 1)->get(),
+        );
 
         if ($records->count() > $limit) {
             throw UnsafeSelection::limitExceeded();

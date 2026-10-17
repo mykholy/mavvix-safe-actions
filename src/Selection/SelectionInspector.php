@@ -25,7 +25,11 @@ final class SelectionInspector
         $requested = ExplicitKeys::forModel($model, $selectedKeys, $limit);
 
         // whereKey is applied to a clone: the caller's query remains reusable.
-        $records = (clone $permittedScope)->whereKey($requested->keys)->get();
+        // Never invoke host "retrieved" model observers during our read-only
+        // inspection. Host-supplied policy callbacks must also remain pure.
+        $records = Model::withoutEvents(
+            fn () => (clone $permittedScope)->whereKey($requested->keys)->get(),
+        );
 
         if ($records->count() !== $requested->count()) {
             throw UnsafeSelection::scopeMismatch();
