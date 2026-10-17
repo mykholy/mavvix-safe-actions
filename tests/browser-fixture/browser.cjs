@@ -59,6 +59,46 @@ const { chromium } = require('playwright');
         await page.emulateMedia({ colorScheme: 'dark' });
         await page.screenshot({ path: path.join(output, 'mobile-dark-confirmation.png'), fullPage: true });
 
+        const expiryResponse = await page.evaluate(async () => {
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const response = await fetch('/safe-actions-e2e-expire', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
+            });
+
+            return { status: response.status, data: await response.json() };
+        });
+
+        if (expiryResponse.status !== 200 || expiryResponse.data.expired < 1) {
+            throw new Error('Could not expire the pending ticket in the isolated test host.');
+        }
+
+        await page.getByRole('button', { name: /تأكيد التغييرات/ }).click();
+        await page.getByText('لم يتم تنفيذ العملية').waitFor({ timeout: 15000 });
+
+        const expiredState = await (await page.request.get(base + '/safe-actions-e2e-state')).json();
+
+        if (expiredState.rows[1].status !== 'pending' || expiredState.consumed !== 1) {
+            throw new Error('Expired confirmation altered records or consumed an invalid ticket.');
+        }
+
+        await page.screenshot({ path: path.join(output, 'arabic-expired-ticket.png'), fullPage: true });
+
+        await page.setViewportSize({ width: 1280, height: 850 });
+        await page.goto(base + '/safe-actions-e2e', { waitUntil: 'networkidle' });
+        const forbiddenRow = page.locator('tbody tr').filter({ hasText: 'Forbidden Row' });
+        await forbiddenRow.locator('input[type="checkbox"]').check({ force: true });
+        await page.getByRole('button', { name: /Archive selected/i }).click();
+        await page.getByText('Unable to preview the selected records').waitFor({ timeout: 15000 });
+
+        const deniedState = await (await page.request.get(base + '/safe-actions-e2e-state')).json();
+
+        if (deniedState.rows[2].status !== 'forbidden' || deniedState.tickets !== expiredState.tickets) {
+            throw new Error('Unauthorized preview mutated a row or created a ticket.');
+        }
+
+        await page.screenshot({ path: path.join(output, 'unauthorized-selection.png'), fullPage: true });
+
         if (failures.length) {
             throw new Error('Browser JavaScript errors: ' + JSON.stringify(failures));
         }
