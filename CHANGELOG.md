@@ -2,7 +2,11 @@
 
 All noteworthy changes will be documented here. Until the first stable release, features may change without a backward-compatibility guarantee.
 
-## Unreleased — pre-alpha
+## v1.0.0 — October 18, 2026
+
+First stable public SemVer API for guarded, synchronous Filament 5 bulk actions. The supported contract is bounded, Eloquent-backed and single-database only. Includes English/Arabic modal integration, signed first-party *textual* security review, real-driver multi-process concurrency tests, dependency audit and a same-SHA gated stable-release workflow. Not independently security-certified; manual screen-reader and representative production load reviews remain open.
+
+## Unreleased — historical pre-alpha work
 
 ### Changed
 
