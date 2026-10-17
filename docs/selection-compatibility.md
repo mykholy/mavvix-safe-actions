@@ -28,6 +28,7 @@ GitHub issue filamentphp/filament#20050 described records excluded by `checkIfRe
 | Selection with row selectability closure | Inspection only | Re-evaluates closure/eligibility server-side |
 | Cross-tenant selection | Inspector fails if host passes scoped query | Real panel-tenancy tests needed |
 | GROUP BY, HAVING, DISTINCT, UNION query shapes | Not supported | Explicitly rejected before resolution because one-row-per-model-key semantics are not proven |
+| Join-backed queries, table aliases, and join-backed global scopes | Not supported | Rejected before hydration; duplicate rows or colliding primary-key columns cannot be treated as an exact selection |
 
 ## Immediate engineering work
 

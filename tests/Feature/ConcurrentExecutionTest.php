@@ -55,7 +55,7 @@ final class ConcurrentExecutionTest extends TestCase
      * @param  array{first: string, second: string}  $tickets
      * @return array{first: string, second: string}
      */
-    private function runCompetingConfirmations(array $tickets): array
+    private function runCompetingConfirmations(array $tickets, bool $preserveScope = false): array
     {
         $dir = sys_get_temp_dir().'/mavvix-safe-actions-'.bin2hex(random_bytes(12));
 
@@ -74,7 +74,7 @@ final class ConcurrentExecutionTest extends TestCase
                 }
 
                 if ($pid === 0) {
-                    $this->runChild($name, $tickets[$name], $dir);
+                    $this->runChild($name, $tickets[$name], $dir, $preserveScope);
                 }
 
                 $children[$name] = $pid;
@@ -111,7 +111,7 @@ final class ConcurrentExecutionTest extends TestCase
         }
     }
 
-    private function runChild(string $name, string $ticket, string $dir): never
+    private function runChild(string $name, string $ticket, string $dir, bool $preserveScope): never
     {
         // The fork inherits the parent's PDO socket. Never share it between
         // processes; force a separate physical connection before any queries.
@@ -128,7 +128,7 @@ final class ConcurrentExecutionTest extends TestCase
                 $this->context(),
                 ProbeOrder::query()->where('tenant_id', 1)->where('status', 'pending'),
                 fn (Model $record): bool => $record->status === 'pending',
-                function (Model $record) use ($dir, $name): void {
+                function (Model $record) use ($dir, $name, $preserveScope): void {
                     if ($name === 'first') {
                         // First transaction holds both its ticket and row locks
                         // while the competing connection starts a confirmation.
@@ -137,7 +137,14 @@ final class ConcurrentExecutionTest extends TestCase
                         usleep(400_000);
                     }
 
-                    $record->status = 'archived';
+                    if ($preserveScope && $name === 'first') {
+                        // Change a persisted column without changing the selected
+                        // identity, tenant, filter, or policy result.
+                        $record->updated_at = now()->addMinutes(10);
+                    } else {
+                        $record->status = 'archived';
+                    }
+
                     $record->save();
                 },
             );
@@ -212,6 +219,24 @@ final class ConcurrentExecutionTest extends TestCase
         self::assertSame('success', $results['first']);
         self::assertSame(UnsafeSelection::class, $results['second']);
         self::assertSame('archived', $order->fresh()->status);
+        self::assertNotNull(SafeActionPreflight::findOrFail($firstTicket)->consumed_at);
+        self::assertNull(SafeActionPreflight::findOrFail($secondTicket)->consumed_at);
+    }
+
+    public function test_concurrent_change_inside_scope_rejects_stale_preview(): void
+    {
+        $order = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+        $firstTicket = $this->preview($order);
+        $secondTicket = $this->preview($order);
+
+        $outcomes = $this->runCompetingConfirmations(
+            ['first' => $firstTicket, 'second' => $secondTicket],
+            preserveScope: true,
+        );
+
+        self::assertSame('success', $outcomes['first']);
+        self::assertSame(UnsafeExecution::class, $outcomes['second']);
+        self::assertSame('pending', $order->fresh()->status);
         self::assertNotNull(SafeActionPreflight::findOrFail($firstTicket)->consumed_at);
         self::assertNull(SafeActionPreflight::findOrFail($secondTicket)->consumed_at);
     }
