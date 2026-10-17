@@ -215,6 +215,7 @@ final class ConcurrentExecutionTest extends TestCase
         self::assertNotNull(SafeActionPreflight::findOrFail($firstTicket)->consumed_at);
         self::assertNull(SafeActionPreflight::findOrFail($secondTicket)->consumed_at);
     }
+
     public function test_abrupt_process_exit_rolls_back_record_and_preflight_consumption(): void
     {
         $order = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
@@ -283,5 +284,4 @@ final class ConcurrentExecutionTest extends TestCase
         self::assertSame('archived', $order->fresh()->status);
         self::assertNotNull(SafeActionPreflight::findOrFail($ticket)->consumed_at);
     }
-
 }
