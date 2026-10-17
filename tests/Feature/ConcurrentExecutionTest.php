@@ -255,17 +255,13 @@ final class ConcurrentExecutionTest extends TestCase
             exit(74);
         }
 
-        try {
-            $this->waitForChild($pid);
+        $finished = pcntl_waitpid($pid, $status);
 
-            self::fail('The child should exit with a deliberate non-zero code.');
-        } catch (RuntimeException $exception) {
-            // A non-zero process exit is expected; waitForChild reports it.
-            self::assertStringContainsString('Child exited with a nonzero status', $exception->getMessage());
-        } finally {
-            clearstatcache(true, $marker);
-        }
+        self::assertSame($pid, $finished);
+        self::assertTrue(pcntl_wifexited($status));
+        self::assertSame(73, pcntl_wexitstatus($status));
 
+        clearstatcache(true, $marker);
         self::assertFileExists($marker, 'The child must reach the mutation before terminating.');
         unlink($marker);
 
