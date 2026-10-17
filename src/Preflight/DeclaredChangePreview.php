@@ -40,7 +40,7 @@ final class DeclaredChangePreview
     }
 
     /**
-     * @param array<string, scalar|null> $changes
+     * @param  array<string, scalar|null>  $changes
      */
     public function summarize(Builder $scope, SelectionInspection $inspection, array $changes): string
     {
