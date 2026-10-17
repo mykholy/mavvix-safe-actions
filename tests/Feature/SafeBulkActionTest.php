@@ -45,7 +45,7 @@ final class SafeBulkActionTest extends TestCase
             ->call('mountTableBulkAction', 'safe_declared_archive')
             ->assertHasNoErrors();
 
-        $component->assertSee('Status: pending → archived');
+        $this->assertDatabaseCount('safe_action_preflights', 1);
 
         self::assertSame('pending', $order->fresh()->status);
 
