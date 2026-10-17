@@ -52,8 +52,7 @@ final class ConcurrentExecutionTest extends TestCase
     }
 
     /**
-     * @param array{first: string, second: string} $tickets
-     *
+     * @param  array{first: string, second: string}  $tickets
      * @return array{first: string, second: string}
      */
     private function runCompetingConfirmations(array $tickets): array
