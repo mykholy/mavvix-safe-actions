@@ -7,6 +7,7 @@ namespace Mavvix\SafeActions\Filament;
 use Filament\Tables\Contracts\HasTable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Mavvix\SafeActions\Exceptions\UnsafeExecution;
 use Mavvix\SafeActions\Exceptions\UnsafeSelection;
 use Mavvix\SafeActions\Execution\ExecutionResult;
 use Mavvix\SafeActions\Execution\GuardedExecutor;
@@ -48,10 +49,26 @@ final class FilamentSafeActionWorkflow
             throw UnsafeSelection::unsupported();
         }
 
+        $scope = $this->getScope($component);
+        $preview = $this->preflights->read($ticketId, $context, $scope);
+
+        if ($preview === null) {
+            throw UnsafeExecution::unavailable();
+        }
+
+        $current = $this->inspector->inspect($component, $authorize);
+
+        if (
+            $preview->recordCount !== $current->recordCount ||
+            ! hash_equals($preview->selectionDigest, $current->selectionDigest)
+        ) {
+            throw UnsafeExecution::selectionChanged();
+        }
+
         return $this->executor->execute(
             $ticketId,
             $context,
-            $this->getScope($component),
+            $scope,
             fn (Model $record): bool => $table->isRecordSelectable($record) && $authorize($record),
             $mutate,
         );
