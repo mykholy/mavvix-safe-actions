@@ -30,7 +30,7 @@ The ticket can be used successfully only once. A failure aborts the transaction 
 | Multi-database transactions | Refused |
 | MySQL 8.4 / PostgreSQL 16 functional CI | Tested: two-process replay, stale rows, pre-commit crash and bounded lock-timeout failure; production load testing outstanding |
 
-Selections are capped at **500 records** by default. Larger selections fail closed; this package does not silently truncate execution.
+Selections are capped at **500 records** by default. For inverse (all-matching except explicitly deselected IDs) selection, the exclusion is applied to the filtered, tenant-scoped SQL query **before** checking the cap. Larger resulting selections still fail closed; this package does not silently truncate execution.
 
 ## Install for development
 
@@ -113,9 +113,25 @@ if the selection differs) and intended target value. It **does not run mutation
 code during preview**. The displayed fields are not a full database diff:
 model observers, casts, database triggers and external side effects may behave
 differently. The configured mutation cannot contain arbitrary callbacks; use
-the custom action when you need complex behavior. Protected identifiers,
-tenant_id and timestamp fields are refused in the declarative API. Always
-review Eloquent observers before using either action in a real application.
+the custom action when you need complex behavior. Protected identifiers, tenant_id, timestamps and common ownership columns
+(organization_id, workspace_id, team_id, account_id, company_id and owner_id)
+are refused in the declarative API. To add custom tenant/ownership fields, publish
+the configuration and edit `protected_update_columns`:
+
+~~~bash
+php artisan vendor:publish --tag=safe-actions-config
+~~~
+
+~~~php
+'protected_update_columns' => [
+    'organization_id', 'workspace_id', 'team_id',
+    'account_id', 'company_id', 'owner_id', 'branch_id',
+],
+~~~
+
+This only constrains `SafeBulkAction::update()`; custom mutation callbacks
+still require explicit policy and tenant-boundary review. Always review Eloquent
+observers before using either action in a real application.
 
 ## Headless API
 
