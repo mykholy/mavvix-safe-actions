@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mavvix\SafeActions;
 
 use Illuminate\Support\ServiceProvider;
+use Mavvix\SafeActions\Console\PrunePreflightsCommand;
 
 final class SafeActionsServiceProvider extends ServiceProvider
 {
@@ -15,6 +16,10 @@ final class SafeActionsServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([PrunePreflightsCommand::class]);
+        }
+
         $this->publishes([
             __DIR__.'/../config/safe-actions.php' => config_path('safe-actions.php'),
         ], 'safe-actions-config');
