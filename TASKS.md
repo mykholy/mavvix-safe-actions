@@ -17,7 +17,8 @@
 - [x] Read-only persisted preflight snapshot with actor/tenant/action binding and expiry (CI tested)
 - [x] One-time consumption and execution-time scope/permission revalidation (CI tested)
 - [x] Native Filament action modal with verified record count (CI tested)
-- [ ] Field-by-field read-only impact diff
+- [x] Bounded read-only old-to-new field summaries for explicitly developer-declared scalar updates
+- [ ] General arbitrary-mutation impact previews remain unsupported by design
 - [x] Atomic bounded database mutation and revalidation (SQLite CI)
 - [x] Sequential duplicate-submission, stale-scope, revoked-policy and rollback tests
 - [x] Two-process duplicate confirmation and stale-scope regression tests on MySQL and PostgreSQL
@@ -31,6 +32,13 @@
 - [x] Single-run MySQL/PostgreSQL microbenchmarks for 1, 100 and 500 records, archived as CI artifacts
 - [ ] Representative warmed-up throughput and percentile benchmarks with concurrency load
 - [x] Drop security-EOL Laravel 11 from Composer compatibility constraints
-- [ ] Independent security review, accessibility/browser validation and release documentation
+- [x] Fresh Laravel 12 Composer install + migration + guarded execution smoke test
+- [x] Real Chromium modal cancel, confirm, expired-token, unauthorized-row, English/Arabic and mobile-dark checks
+- [x] Automated axe-core desktop and mobile RTL/dark scan with no reported violations (manual checks outstanding)
+- [x] Composer security audit CI on Laravel 12 and 13
+- [ ] Independent security review and sign-off
+- [ ] Manual keyboard/screen reader accessibility validation and complex selection UX
+- [ ] Independent production-like latency, contention and scalability benchmarks
+- [ ] Release documentation and versioned compatibility review
 
 **Release status: pre-alpha.** Do not tag v1.0.0 until all gates in `IMPLEMENTATION_PLAN.md` are satisfied.

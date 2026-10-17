@@ -171,13 +171,13 @@ Do not treat these short-lived tickets as an immutable audit trail.
 - Rolls back database changes when a callback fails before commit. It **cannot** roll back external APIs, sent messages, dispatched jobs or mutations on another database connection.
 - Cannot guarantee a field-level immutable diff, full protection against all cross-process races, or rollback after a successful commit.
 - Rejects unsupported pivots and unbounded selections. Functional and two-process replay/stale-scope regression tests pass on MySQL and PostgreSQL; abrupt pre-commit process-crash recovery tests also pass; broader concurrency and scale benchmarks remain required.
-- Still requires independent security review, browser coverage, broader lock-contention/scale benchmarks and a supported-version matrix before v1.0.0.
+- Automated Chromium end-to-end coverage and axe-core scanning have passed, but **manual keyboard/screen-reader review** and **independent security review** are outstanding, as are broader lock-contention/scale benchmarks before v1.0.0.
 
 Callbacks must be short-running, synchronous and database-only. Do not perform irreversible work from the mutation callback. Use an outbox and a separate worker if you need external effects.
 
 ## Documentation and development
 
-[Implementation plan](IMPLEMENTATION_PLAN.md) · [Task board](TASKS.md) · [Selection compatibility](docs/selection-compatibility.md) · [Security model](docs/security-model.md) · [Measured CI benchmarks](docs/benchmark-results-2026-10-17.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [CI](.github/workflows/tests.yml)
+[Implementation plan](IMPLEMENTATION_PLAN.md) · [Task board](TASKS.md) · [Selection compatibility](docs/selection-compatibility.md) · [Security model](docs/security-model.md) · [Measured CI benchmarks](docs/benchmark-results-2026-10-17.md) · [Release readiness](docs/release-readiness-2026-10-17.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [CI](.github/workflows/tests.yml)
 
 To report a vulnerability, use a private GitHub Security Advisory if available. Do not publish exploit details in a public issue.
 
