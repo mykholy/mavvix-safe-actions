@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright');
+const AxeBuilder = require('@axe-core/playwright').default;
 
 (async () => {
     const base = 'http://127.0.0.1:8181';
@@ -28,6 +29,22 @@ const { chromium } = require('playwright');
 
         await page.getByText('Records to change').waitFor({ timeout: 15000 });
         await page.screenshot({ path: path.join(output, 'desktop-confirmation.png'), fullPage: true });
+
+        const desktopAudit = await new AxeBuilder({ page })
+            .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+            .analyze();
+        fs.writeFileSync(
+            path.join(output, 'accessibility-desktop.json'),
+            JSON.stringify({ violations: desktopAudit.violations, incomplete: desktopAudit.incomplete }, null, 2),
+        );
+        const desktopBlockers = desktopAudit.violations.filter(issue =>
+            ['critical', 'serious'].includes(issue.impact)
+        );
+        if (desktopBlockers.length > 0) {
+            throw new Error('Desktop accessibility violations: ' +
+                desktopBlockers.map(issue => issue.id + ' (' + issue.impact + ')').join(', '));
+        }
+
 
         await page.getByRole('button', { name: /Cancel/i }).last().click();
         const afterCancel = await (await page.request.get(base + '/safe-actions-e2e-state')).json();
@@ -58,6 +75,22 @@ const { chromium } = require('playwright');
         await page.setViewportSize({ width: 390, height: 844 });
         await page.emulateMedia({ colorScheme: 'dark' });
         await page.screenshot({ path: path.join(output, 'mobile-dark-confirmation.png'), fullPage: true });
+
+        const mobileAudit = await new AxeBuilder({ page })
+            .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+            .analyze();
+        fs.writeFileSync(
+            path.join(output, 'accessibility-mobile-dark-ar.json'),
+            JSON.stringify({ violations: mobileAudit.violations, incomplete: mobileAudit.incomplete }, null, 2),
+        );
+        const mobileBlockers = mobileAudit.violations.filter(issue =>
+            ['critical', 'serious'].includes(issue.impact)
+        );
+        if (mobileBlockers.length > 0) {
+            throw new Error('Mobile/Arabic accessibility violations: ' +
+                mobileBlockers.map(issue => issue.id + ' (' + issue.impact + ')').join(', '));
+        }
+
 
         const expiryResponse = await page.evaluate(async () => {
             const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
