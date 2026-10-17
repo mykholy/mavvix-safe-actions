@@ -24,7 +24,7 @@ GitHub issue filamentphp/filament#20050 described records excluded by `checkIfRe
 | Explicit key list with a host-supplied scoped Eloquent query | Headless inspector only | Package tests pass in Laravel 12/13 CI |
 | Filament manually checked rows | Inspection only | Livewire adapter validates filtered query, global search and per-row checks |
 | Filament current-page select-all | Inspection only | Rejects explicit IDs outside the current displayed page; inverse selection refused |
-| Filtered/select-all-matching | Inspection only, bounded to 500 matching rows | Inverse mode inspects filtered query; larger selections fail closed |
+| Filtered/select-all-matching | Inspection only, bounded to 500 selected rows | Inverse mode excludes canonical deselected IDs within the filtered SQL query before counting; larger final selections fail closed |
 | Selection with row selectability closure | Inspection only | Re-evaluates closure/eligibility server-side |
 | Cross-tenant selection | Inspector fails if host passes scoped query | Real panel-tenancy tests needed |
 | GROUP BY, HAVING, DISTINCT, UNION query shapes | Not supported | Explicitly rejected before resolution because one-row-per-model-key semantics are not proven |
