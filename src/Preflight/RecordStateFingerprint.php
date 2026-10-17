@@ -31,10 +31,12 @@ final class RecordStateFingerprint
         $model = $scope->getModel();
 
         // Include the model's columns even when the host selects a subset.
-        $records = (clone $scope)
-            ->whereKey($inspection->recordKeys)
-            ->addSelect($model->qualifyColumn('*'))
-            ->get();
+        $records = Model::withoutEvents(
+            fn () => (clone $scope)
+                ->whereKey($inspection->recordKeys)
+                ->addSelect($model->qualifyColumn('*'))
+                ->get(),
+        );
 
         if ($records->count() !== $inspection->recordCount) {
             throw UnsafeSelection::scopeMismatch();

@@ -14,6 +14,7 @@ All noteworthy changes will be documented here. Until the first stable release, 
 - Regression tests for same-scope data drift, old ticket rejection and query projections that omit columns.
 - Explicit rejection of grouped, HAVING, DISTINCT and UNION queries; Livewire regression cases for global search with explicit and inverse selections.
 - Refuse unsafe join-backed/global-scope SQL and table aliases before model hydration; independently reproduce stale-row lock contention when changed data remains inside the permitted scope.
+- Suppress package-owned Eloquent `retrieved` events during read-only inspection and locked-row hydration without suppressing mutation-time model lifecycle events.
 - Composer package and Laravel auto-discovery.
 - Canonical, bounded explicit selection inspector.
 - Filament 5 adapter for filtered, current-page and bounded all-matching selections.

@@ -170,6 +170,7 @@ Do not treat these short-lived tickets as an immutable audit trail.
 - Revalidates selection identity, filtered query, actor/tenant context, per-record eligibility and persisted model values at execution. Any selected record changed since preview requires a new ticket, even when the query and IDs are unchanged.
 - Serializes uses of the same ticket and locks the selected rows within a transaction where supported by the database.
 - Rolls back database changes when a callback fails before commit. It **cannot** roll back external APIs, sent messages, dispatched jobs or mutations on another database connection.
+- Suppresses Eloquent `retrieved` observers for package-owned read-only queries, but does not suppress mutation lifecycle events. Host authorization callbacks and Filament's own table hydration remain under host-application control.
 - Cannot guarantee a field-level immutable diff, full protection against all cross-process races, or rollback after a successful commit.
 - Rejects unsupported pivots and unbounded selections. Functional and two-process replay/stale-scope regression tests pass on MySQL and PostgreSQL; abrupt pre-commit process-crash recovery tests also pass; broader concurrency and scale benchmarks remain required.
 - Automated Chromium end-to-end coverage and axe-core scanning have passed, but **manual keyboard/screen-reader review** and **independent security review** are outstanding, as are broader lock-contention/scale benchmarks before v1.0.0.
