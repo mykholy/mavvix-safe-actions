@@ -40,7 +40,7 @@ final class SafeBulkAction
             ->requiresConfirmation()
             ->modalDescription(fn (): string => (string) __('safe-actions::messages.modal.description'))
             ->modalSubmitActionLabel(fn (): string => (string) __('safe-actions::messages.modal.confirm'))
-            ->modalSubmitAction(fn (Action $action): Action => $action->color('danger'))
+            ->modalSubmitAction(fn (Action $action): Action => $action->color('gray'))
             ->schema([
                 Hidden::make('safe_action_ticket')->required(),
                 TextInput::make('safe_action_count')
