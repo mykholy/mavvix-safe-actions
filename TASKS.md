@@ -52,4 +52,4 @@
 - [x] Publish a release playbook and CI-linked compatibility evidence
 - [ ] Independent reviewer approval of the final versioned compatibility/release contract
 
-**Release status: pre-alpha.** Do not tag v1.0.0 until all gates in `IMPLEMENTATION_PLAN.md` are satisfied.
+**Release decision (October 18, 2026):** owner-directed scoped v1.0.0 stable SemVer release proceeds only after five final-main-SHA CI checks pass. See `docs/security-review-v1.0.0.md`. Independent security review, human screen-reader evaluation and production-like load qualification remain explicitly **open** and must not be reported as completed.
