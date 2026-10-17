@@ -11,6 +11,8 @@
 - [x] Add bounded adapter and Livewire regression coverage for filtered/all-matching selections (tested on Laravel 12/13)
 - [x] Apply inverse-selection exclusions before the bounded SQL scan; verify exactly 499 of 501 rows can be selected safely
 - [x] Add host-configurable protected ownership columns to the declarative update API
+- [x] Make built-in ownership/identifier bans immutable even if host config overrides its custom list
+- [x] Add CI-gated multi-worker MySQL/PostgreSQL contention regressions for same-ticket, overlapping-ticket and isolated-tenant confirmations
 - [x] Test global search, explicit and inverse selections, and reject unsupported grouped/aggregate query shapes
 - [ ] Test pivot identity and Filament UI-level group/relationship selections
 - [ ] Obtain an independently reviewable selection adapter contract

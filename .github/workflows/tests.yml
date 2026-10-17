@@ -88,6 +88,15 @@ jobs:
         env:
           SAFE_ACTIONS_BENCHMARK_REPORT: ${{ runner.temp }}/safe-actions-bench-mysql.jsonl
         run: vendor/bin/phpunit --filter PerformanceBenchmarkTest --fail-on-skipped
+      - name: Concurrent MySQL confirmation load (independent PDO workers)
+        env:
+          SAFE_ACTIONS_CONCURRENT_REPORT: ${{ runner.temp }}/safe-actions-concurrent-mysql.jsonl
+        run: vendor/bin/phpunit --filter ConcurrentLoadTest --fail-on-skipped
+      - uses: actions/upload-artifact@v4
+        with:
+          name: safe-actions-concurrent-mysql
+          path: ${{ runner.temp }}/safe-actions-concurrent-mysql.jsonl
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: safe-actions-bench-mysql
@@ -140,6 +149,15 @@ jobs:
         env:
           SAFE_ACTIONS_BENCHMARK_REPORT: ${{ runner.temp }}/safe-actions-bench-postgres.jsonl
         run: vendor/bin/phpunit --filter PerformanceBenchmarkTest --fail-on-skipped
+      - name: Concurrent PostgreSQL confirmation load (independent PDO workers)
+        env:
+          SAFE_ACTIONS_CONCURRENT_REPORT: ${{ runner.temp }}/safe-actions-concurrent-postgres.jsonl
+        run: vendor/bin/phpunit --filter ConcurrentLoadTest --fail-on-skipped
+      - uses: actions/upload-artifact@v4
+        with:
+          name: safe-actions-concurrent-postgres
+          path: ${{ runner.temp }}/safe-actions-concurrent-postgres.jsonl
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: safe-actions-bench-postgres

@@ -115,7 +115,8 @@ model observers, casts, database triggers and external side effects may behave
 differently. The configured mutation cannot contain arbitrary callbacks; use
 the custom action when you need complex behavior. Protected identifiers, tenant_id, timestamps and common ownership columns
 (organization_id, workspace_id, team_id, account_id, company_id and owner_id)
-are refused in the declarative API. To add custom tenant/ownership fields, publish
+are always refused in the declarative API, even if the application overrides
+its published configuration. To add custom tenant/ownership fields, publish
 the configuration and edit `protected_update_columns`:
 
 ~~~bash
@@ -123,10 +124,7 @@ php artisan vendor:publish --tag=safe-actions-config
 ~~~
 
 ~~~php
-'protected_update_columns' => [
-    'organization_id', 'workspace_id', 'team_id',
-    'account_id', 'company_id', 'owner_id', 'branch_id',
-],
+'protected_update_columns' => ['branch_id'],
 ~~~
 
 This only constrains `SafeBulkAction::update()`; custom mutation callbacks
@@ -188,14 +186,14 @@ Do not treat these short-lived tickets as an immutable audit trail.
 - Rolls back database changes when a callback fails before commit. It **cannot** roll back external APIs, sent messages, dispatched jobs or mutations on another database connection.
 - Suppresses Eloquent `retrieved` observers for package-owned read-only queries, but does not suppress mutation lifecycle events. Host authorization callbacks and Filament's own table hydration remain under host-application control.
 - Cannot guarantee a field-level immutable diff, full protection against all cross-process races, or rollback after a successful commit.
-- Rejects unsupported pivots and unbounded selections. Functional and two-process replay/stale-scope regression tests pass on MySQL and PostgreSQL; abrupt pre-commit process-crash recovery tests also pass; broader concurrency and scale benchmarks remain required.
+- Rejects unsupported pivots and unbounded selections. Functional and two-process replay/stale-scope regression tests pass on MySQL and PostgreSQL; abrupt pre-commit process-crash recovery tests also pass. A small independent-PDO multi-worker contention suite exercises 4/8 confirmations across 100/500 rows, including competing and isolated tenants. These synthetic cases are not a production-scale workload; broader real-world capacity qualification remains required.
 - Automated Chromium end-to-end coverage, keyboard focus and Escape cancellation, and axe-core scanning have passed, but **human screen-reader/accessibility review** and **independent security review** are outstanding, as is production-like concurrent load qualification before v1.0.0.
 
 Callbacks must be short-running, synchronous and database-only. Do not perform irreversible work from the mutation callback. Use an outbox and a separate worker if you need external effects.
 
 ## Documentation and development
 
-[Implementation plan](IMPLEMENTATION_PLAN.md) · [Release playbook](docs/release-playbook.md) · [Compatibility verification](docs/compatibility-verification.md) · [Task board](TASKS.md) · [Selection compatibility](docs/selection-compatibility.md) · [Security model](docs/security-model.md) · [Measured CI benchmarks](docs/benchmark-results-2026-10-17.md) · [Release readiness](docs/release-readiness-2026-10-17.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [CI](.github/workflows/tests.yml)
+[Implementation plan](IMPLEMENTATION_PLAN.md) · [Release playbook](docs/release-playbook.md) · [Compatibility verification](docs/compatibility-verification.md) · [Task board](TASKS.md) · [Selection compatibility](docs/selection-compatibility.md) · [Security model](docs/security-model.md) · [Measured CI benchmarks](docs/benchmark-results-2026-10-17.md) · [Release review packet](docs/release-candidate-review-packet-2026-10-18.md) · [Release readiness](docs/release-readiness-2026-10-17.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [CI](.github/workflows/tests.yml)
 
 To report a vulnerability, use a private GitHub Security Advisory if available. Do not publish exploit details in a public issue.
 

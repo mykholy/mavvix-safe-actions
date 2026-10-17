@@ -19,6 +19,21 @@ use Mavvix\SafeActions\Selection\SelectionInspection;
  */
 final class DeclaredChangePreview
 {
+    /** @var list<string> Ownership fields which application config cannot unprotect. */
+    private const PROTECTED_COLUMNS = [
+        'id',
+        'tenant_id',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+        'organization_id',
+        'workspace_id',
+        'team_id',
+        'account_id',
+        'company_id',
+        'owner_id',
+    ];
+
     /**
      * @param  array<array-key, mixed>  $changes
      */
@@ -41,7 +56,7 @@ final class DeclaredChangePreview
             if (
                 ! is_string($field) ||
                 ! preg_match('/^[a-z][a-z0-9_]*$/D', $field) ||
-                in_array($field, ['id', 'tenant_id', 'created_at', 'updated_at', 'deleted_at'], true) ||
+                in_array($field, self::PROTECTED_COLUMNS, true) ||
                 in_array($field, $protected, true) ||
                 (! is_null($value) && ! is_scalar($value)) ||
                 (is_string($value) && strlen($value) > 2000)
