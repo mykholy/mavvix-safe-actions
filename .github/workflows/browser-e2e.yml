@@ -68,6 +68,6 @@ jobs:
         with:
           name: safe-actions-browser-evidence
           path: |
-            ${{ runner.temp }}/safe-actions-browser-screenshots
+            /tmp/safe-actions-browser-screenshots
             ${{ runner.temp }}/safe-actions-browser-server.log
           if-no-files-found: warn
