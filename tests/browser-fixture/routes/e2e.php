@@ -23,3 +23,15 @@ Route::get('/safe-actions-e2e-state', static function () {
         'consumed' => DB::table('safe_action_preflights')->whereNotNull('consumed_at')->count(),
     ]);
 });
+
+
+// Only installed by the disposable CI fixture, never registered by the package.
+Route::post('/safe-actions-e2e-expire', static function () {
+    abort_unless(Auth::check(), 403);
+
+    $changed = DB::table('safe_action_preflights')
+        ->whereNull('consumed_at')
+        ->update(['expires_at' => now()->subMinute()]);
+
+    return response()->json(['expired' => $changed]);
+});
