@@ -45,7 +45,8 @@ Any exception before commit rolls back the transaction. The executor performs **
 ## Remaining verification work
 
 - Functional and independent-process duplicate-ticket/stale-scope tests pass on MySQL 8.4 and PostgreSQL 16.
-- Still require explicit forced process-crash recovery and additional lock/contention tests.
+- Abrupt process exit after an UPDATE but before COMMIT has passed rollback/retry tests on both real database drivers.
+- Additional lock contention, deadlock, cancellation and scale benchmarks still need verification.
 - Browser and accessibility tests for modal error, cancel and success states.
 - Larastan/PHPStan level 5 passes without a suppression baseline; independent security review remains required.
 - Defensive handling of model hooks that dispatch external effects, preferably via transactional outbox.
