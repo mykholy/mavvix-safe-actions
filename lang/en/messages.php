@@ -7,6 +7,10 @@ return [
         'description' => 'Review the verified record count before confirming. Permissions are checked again during execution.',
         'confirm' => 'Confirm changes',
         'record_count' => 'Records to change',
+        'impact' => 'Declared changes (read-only)',
+        'mixed_values' => '(multiple values)',
+        'null_value' => '(null)',
+        'unavailable_value' => '(unavailable)',
     ],
     'notifications' => [
         'preview_failed' => 'Unable to preview the selected records',
