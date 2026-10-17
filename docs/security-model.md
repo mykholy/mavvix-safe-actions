@@ -35,6 +35,7 @@ Any exception before commit rolls back the transaction. The executor performs **
 | Policy revoked or row made unselectable | Entire action rejected |
 | Different actor, tenant, guard, panel or action | Ticket unavailable |
 | Changed SQL or query bindings | New preview required |
+| Changed selected record IDs without changing filters | New preview required |
 | Expired / already used ticket | Ticket unavailable |
 | More than the configured record limit | Entire action rejected |
 | Pivot identity / unbounded selection / foreign DB connection | Unsupported |
@@ -43,10 +44,10 @@ Any exception before commit rolls back the transaction. The executor performs **
 
 ## Remaining verification work
 
-- MySQL 8.4 and PostgreSQL 16 functional tests pass; still require **two-session parallel submission** tests for locking and idempotency.
-- Two-session parallel confirmation of the same ticket.
+- Functional and independent-process duplicate-ticket/stale-scope tests pass on MySQL 8.4 and PostgreSQL 16.
+- Still require explicit forced process-crash recovery and additional lock/contention tests.
 - Browser and accessibility tests for modal error, cancel and success states.
-- Static analysis and independent security review.
+- Larastan/PHPStan level 5 passes without a suppression baseline; independent security review remains required.
 - Defensive handling of model hooks that dispatch external effects, preferably via transactional outbox.
 - Explicit support-policy decision for complex grouped and relationship-backed tables.
 
