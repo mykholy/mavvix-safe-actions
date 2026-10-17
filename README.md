@@ -18,8 +18,8 @@ The ticket can be used successfully only once. A failure aborts the transaction 
 
 | Runtime / mode | Status |
 | --- | --- |
-| Filament 5 + Laravel 12 / PHP 8.3 | CI tested; Laravel 12 security support through February 24, 2027 |
-| Filament 5 + Laravel 13 / PHP 8.4 | CI tested |
+| Filament 5 + Laravel 12 / PHP 8.2 and 8.3 | CI tested; Laravel 12 security support through February 24, 2027 |
+| Filament 5 + Laravel 13 / PHP 8.4 | CI tested; independent host installation smoke tested |
 | Laravel 11 | Not supported (upstream security support ended March 12, 2026) |
 | Filament 3 / 4 | Not supported |
 | Eloquent tables with single-column primary keys | Supported |
@@ -28,7 +28,7 @@ The ticket can be used successfully only once. A failure aborts the transaction 
 | Grouped, HAVING, DISTINCT, JOIN or UNION source queries, or table aliases | Refused (identity resolution not proven) |
 | Non-Eloquent data sources | Refused |
 | Multi-database transactions | Refused |
-| MySQL 8.4 / PostgreSQL 16 functional CI | Tested (parallel concurrency testing outstanding) |
+| MySQL 8.4 / PostgreSQL 16 functional CI | Tested: two-process replay, stale rows, pre-commit crash and bounded lock-timeout failure; production load testing outstanding |
 
 Selections are capped at **500 records** by default. Larger selections fail closed; this package does not silently truncate execution.
 
@@ -173,7 +173,7 @@ Do not treat these short-lived tickets as an immutable audit trail.
 - Suppresses Eloquent `retrieved` observers for package-owned read-only queries, but does not suppress mutation lifecycle events. Host authorization callbacks and Filament's own table hydration remain under host-application control.
 - Cannot guarantee a field-level immutable diff, full protection against all cross-process races, or rollback after a successful commit.
 - Rejects unsupported pivots and unbounded selections. Functional and two-process replay/stale-scope regression tests pass on MySQL and PostgreSQL; abrupt pre-commit process-crash recovery tests also pass; broader concurrency and scale benchmarks remain required.
-- Automated Chromium end-to-end coverage and axe-core scanning have passed, but **manual keyboard/screen-reader review** and **independent security review** are outstanding, as are broader lock-contention/scale benchmarks before v1.0.0.
+- Automated Chromium end-to-end coverage, keyboard focus and Escape cancellation, and axe-core scanning have passed, but **human screen-reader/accessibility review** and **independent security review** are outstanding, as is production-like concurrent load qualification before v1.0.0.
 
 Callbacks must be short-running, synchronous and database-only. Do not perform irreversible work from the mutation callback. Use an outbox and a separate worker if you need external effects.
 

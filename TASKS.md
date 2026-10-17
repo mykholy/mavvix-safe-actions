@@ -45,6 +45,7 @@
 - [ ] Independent security review and sign-off
 - [ ] Manual keyboard/screen reader accessibility validation and complex selection UX
 - [ ] Independent production-like latency, contention and scalability benchmarks
-- [ ] Release documentation and versioned compatibility review
+- [x] Publish a release playbook and CI-linked compatibility evidence
+- [ ] Independent reviewer approval of the final versioned compatibility/release contract
 
 **Release status: pre-alpha.** Do not tag v1.0.0 until all gates in `IMPLEMENTATION_PLAN.md` are satisfied.

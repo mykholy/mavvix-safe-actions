@@ -33,3 +33,22 @@ Peak PHP process memory recorded by the test process was 42,467,328, 44,564,480 
 - Measurement methodology: [benchmarks.md](benchmarks.md)
 - Default operation ceiling remains 500 records.
 - Before increasing the ceiling or publishing performance targets, run repeated warmed-up samples, concurrency pressure, P50/P95/P99, lock-contention, database-level tracing and application-specific workload tests.
+
+
+## Repeated warmed-up CI samples
+
+[CI run 39016948200](https://github.com/mykholy/mavvix-safe-actions/actions/runs/39016948200) produced separate real-driver `warmed-repeated` JSONL artifacts. Each workload uses **3 warmups then 20 measured sequential executions**. The following values were read from those artifacts and are **milliseconds**, not production SLOs.
+
+| Selected rows | MySQL execution P50 / P95 / P99 | PostgreSQL execution P50 / P95 / P99 |
+| ---: | ---: | ---: |
+| 1 | 3.236 / 3.656 / 3.775 | 2.946 / 3.882 / 19.969 |
+| 100 | 44.108 / 46.458 / 47.408 | 47.591 / 49.973 / 50.354 |
+| 500 | 209.065 / 227.773 / 254.608 | 233.738 / 269.927 / 304.639 |
+
+| Selected rows | MySQL preview P95 | PostgreSQL preview P95 |
+| ---: | ---: | ---: |
+| 1 | 2.165 | 3.419 |
+| 100 | 4.149 | 3.424 |
+| 500 | 14.347 | 34.826 |
+
+Empirical nearest-rank P99 over 20 observations is the **maximum observed sample**, not a reliable production 99th-percentile prediction. The results exclude setup, final assertions, browser request time and concurrency. The 500-row ceiling remains unchanged; load and lock-contention qualification is still required.
