@@ -1,0 +1,149 @@
+name: Publish v1.0.1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v1.0.1.yml'
+      - 'docs/releases/v1.0.1.md'
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: mavvix-publish-stable-v1
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Verify final SHA, tag and publish GitHub release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+          coverage: none
+
+      - name: Validate package manifest and recorded review
+        run: |
+          set -euo pipefail
+          composer validate --strict
+          test -s docs/security-review-v1.0.0.md
+          test -s docs/releases/v1.0.1.md
+          grep -q 'NOT INDEPENDENT' docs/security-review-v1.0.0.md
+          grep -q 'NOT received independent security sign-off' docs/releases/v1.0.1.md
+
+      - name: Require all five green push checks on exactly this main SHA
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          current="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
+          if [ "$current" != "$TARGET_SHA" ]; then
+            echo "::error::main moved after this workflow started"
+            exit 1
+          fi
+
+          qualified=0
+          for attempt in $(seq 1 48); do
+            gh api "repos/${GITHUB_REPOSITORY}/actions/runs?branch=main&per_page=100" > "$RUNNER_TEMP/mavvix-ci-runs.json"
+            if python3 - "$TARGET_SHA" "$RUNNER_TEMP/mavvix-ci-runs.json" <<'PY'
+          import json
+          import sys
+
+          sha, filename = sys.argv[1:]
+          required = {
+              "Tests",
+              "Static analysis",
+              "Dependency security audit",
+              "Fresh host installation",
+              "Browser end-to-end",
+          }
+
+          with open(filename, encoding="utf-8") as stream:
+              response = json.load(stream)
+
+          latest = {}
+          for run in response.get("workflow_runs", []):
+              name = run.get("name")
+              if name not in required or name in latest:
+                  continue
+              if run.get("head_sha") != sha or run.get("event") != "push":
+                  continue
+              latest[name] = run
+
+          missing = required - set(latest)
+          incomplete = {name: run.get("status") for name, run in latest.items() if run.get("status") != "completed"}
+          unsuccessful = {name: run.get("conclusion") for name, run in latest.items() if run.get("status") == "completed" and run.get("conclusion") != "success"}
+          print("Required CI:", {name: {"status": latest[name]["status"], "conclusion": latest[name].get("conclusion")} for name in sorted(latest)})
+          if missing:
+              print("Missing CI checks:", sorted(missing))
+          if incomplete:
+              print("Incomplete CI checks:", incomplete)
+          if unsuccessful:
+              print("Unsuccessful CI checks:", unsuccessful)
+
+          sys.exit(0 if len(latest) == 5 and not incomplete and not unsuccessful else 1)
+          PY
+            then
+              qualified=1
+              break
+            fi
+            echo "Final-SHA qualification incomplete; checking again"
+            sleep 10
+          done
+
+          if [ "$qualified" != 1 ]; then
+            echo "::error::Cannot publish v1.0.1 without five successful same-SHA push checks"
+            exit 1
+          fi
+
+          # Ensure the checked commit is still the current main ref.
+          current="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
+          if [ "$current" != "$TARGET_SHA" ]; then
+            echo "::error::main moved while checks were running"
+            exit 1
+          fi
+
+      - name: Create annotated stable tag and publish actual GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --tags origin
+
+          if git show-ref --tags --verify --quiet refs/tags/v1.0.1; then
+            tagged_sha="$(git rev-list -n 1 refs/tags/v1.0.1)"
+            if [ "$tagged_sha" != "$TARGET_SHA" ]; then
+              echo "::error::Existing tag v1.0.1 points to a different commit"
+              exit 1
+            fi
+            echo "Existing v1.0.1 tag already points to qualified SHA"
+          else
+            git tag -a v1.0.1 "$TARGET_SHA" -m "Mavvix Safe Actions v1.0.1: scoped stable API, first-party review disclosed"
+            git push origin refs/tags/v1.0.1
+          fi
+
+          if gh release view v1.0.1 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "GitHub release v1.0.1 is already published"
+          else
+            gh release create v1.0.1 \
+              --repo "$GITHUB_REPOSITORY" \
+              --verify-tag \
+              --latest \
+              --title "Mavvix Safe Actions v1.0.1" \
+              --notes-file docs/releases/v1.0.1.md
+          fi
+          gh release view v1.0.1 --repo "$GITHUB_REPOSITORY" --json url,tagName,isDraft,isPrerelease

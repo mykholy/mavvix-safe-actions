@@ -1,4 +1,6 @@
-# Mavvix Safe Actions — release-candidate review packet
+# Mavvix Safe Actions — historical release-candidate review packet
+
+> **Historical review packet.** The owner subsequently authorized and published a narrowly scoped stable SemVer release with a **non-independent first-party assessment**. Its release record is [v1.0.0](https://github.com/mykholy/mavvix-safe-actions/releases/tag/v1.0.0), and the current source-level assessment is [security-review-v1.0.0.md](security-review-v1.0.0.md). Independent security review, manual accessibility and production-shaped load evaluation remain open. The unsigned independent sign-off and initial NO-GO section below are preserved as the original state of the review.
 
 **Prepared:** 2026-10-18 (Africa/Cairo)  
 **Status:** evidence for review, **NOT an independent security sign-off** and **NOT stable**.

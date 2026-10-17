@@ -1,6 +1,6 @@
 # Filament 5 selection compatibility — discovery log
 
-Status: **Pre-alpha. A bounded Filament selection adapter, query-bound preflight and guarded synchronous execution are tested in Laravel 12/13 CI. Additional driver and security testing is required.**
+Status: **historical compatibility discovery notes, updated for v1.x**. The bounded Filament 5 selection adapter, query-bound preflight and guarded synchronous execution are tested in Laravel 12/13 CI, including MySQL 8.4/PostgreSQL 16 concurrency cases. See [README](../README.md#compatibility) and [security review](security-review-v1.0.0.md) for actual release guarantees and unresolved independent audit limits.
 
 ## Verified public APIs in Filament 5 documentation
 
@@ -38,4 +38,4 @@ GitHub issue filamentphp/filament#20050 described records excluded by `checkIfRe
 4. Extend the existing inspector regression cases (828/842 and 101/18) with Filament selectability and filtered all-matching cases, UUID keys and permission changes.
 5. If exact target identity cannot be proven, disable that mode and display a clear unsupported-selection error.
 
-A preview-and-confirmation action is available on main as pre-alpha, without a stable release. Do not publish a stable release until the remaining selection, browser, concurrency and security gates pass.
+A preview-and-confirmation action has been available since v1.0.0. The first-party assessment and exact limitations are recorded in [docs/security-review-v1.0.0.md](security-review-v1.0.0.md); independent security and human screen-reader sign-off are still outstanding. The engineering tasks above describe future extensions, not blockers to the already-published scoped SemVer API.
