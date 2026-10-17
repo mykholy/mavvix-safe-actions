@@ -1,0 +1,73 @@
+name: Browser end-to-end
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  chromium:
+    name: Chromium / real Filament table and modal
+    runs-on: ubuntu-latest
+    env:
+      SAFE_ACTIONS_HOST_PATH: /tmp/mavvix-safe-actions-browser-host
+      SAFE_ACTIONS_SCREENSHOTS: /tmp/safe-actions-browser-screenshots
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, pdo_sqlite, dom, xml, zip
+          tools: composer:v2
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install the checked-out package into a fresh Laravel host
+        run: |
+          composer create-project "laravel/laravel:^12.0" "$SAFE_ACTIONS_HOST_PATH" --no-interaction --prefer-dist --no-progress
+          cd "$SAFE_ACTIONS_HOST_PATH"
+          composer config repositories.local path "$GITHUB_WORKSPACE"
+          composer require "mykholy/mavvix-safe-actions:@dev" --no-interaction --prefer-dist --no-progress --with-all-dependencies
+          cp .env.example .env
+          touch database/database.sqlite
+          php artisan key:generate --force
+          php artisan filament:install --scaffold --no-interaction
+          php artisan vendor:publish --tag=safe-actions-migrations --force
+          php artisan migrate --force
+      - name: Install isolated browser fixture and build UI assets
+        run: |
+          cd "$SAFE_ACTIONS_HOST_PATH"
+          mkdir -p app/Livewire app/Models resources/views routes
+          cp "$GITHUB_WORKSPACE/tests/browser-fixture/app/Livewire/SafeActionsDemo.php" app/Livewire/
+          cp "$GITHUB_WORKSPACE/tests/browser-fixture/app/Models/BrowserOrder.php" app/Models/
+          cp "$GITHUB_WORKSPACE/tests/browser-fixture/resources/views/"*.blade.php resources/views/
+          cp "$GITHUB_WORKSPACE/tests/browser-fixture/routes/e2e.php" routes/e2e.php
+          cp "$GITHUB_WORKSPACE/tests/browser-fixture/browser.cjs" e2e-browser.cjs
+          printf '\nrequire __DIR__ . "/e2e.php";\n' >> routes/web.php
+          php "$GITHUB_WORKSPACE/tests/browser-fixture/seed.php"
+          npm install --no-audit --no-fund
+          npm run build
+          npm install --no-save playwright@1.56.1 --no-audit --no-fund
+          npx playwright install chromium --with-deps
+      - name: Test native Filament confirmation in Chromium
+        run: |
+          cd "$SAFE_ACTIONS_HOST_PATH"
+          php artisan serve --host=127.0.0.1 --port=8181 > "$RUNNER_TEMP/safe-actions-browser-server.log" 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8181/safe-actions-e2e > /dev/null; then break; fi
+            sleep 1
+          done
+          node e2e-browser.cjs
+      - name: Upload screenshots and server log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: safe-actions-browser-evidence
+          path: |
+            /tmp/safe-actions-browser-screenshots
+            ${{ runner.temp }}/safe-actions-browser-server.log
+          if-no-files-found: warn
