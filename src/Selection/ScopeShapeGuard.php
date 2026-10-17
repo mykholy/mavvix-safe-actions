@@ -15,10 +15,15 @@ final class ScopeShapeGuard
 {
     public static function assertSupported(Builder $scope): void
     {
-        $query = $scope->getQuery();
+        // Eloquent global scopes can add joins or GROUP BY clauses after the
+        // application creates its builder. Validate the actual SQL shape.
+        $query = (clone $scope)->applyScopes()->getQuery();
+        $expectedFrom = $scope->getModel()->getTable();
 
         if (
+            $query->from !== $expectedFrom ||
             $query->distinct !== false ||
+            ! empty($query->joins) ||
             ! empty($query->groups) ||
             ! empty($query->havings) ||
             ! empty($query->unions) ||

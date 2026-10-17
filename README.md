@@ -25,7 +25,7 @@ The ticket can be used successfully only once. A failure aborts the transaction 
 | Eloquent tables with single-column primary keys | Supported |
 | Filtered, current-page and bounded all-matching selections | Livewire tests |
 | Pivot-row identities and duplicate relationship rows | Refused |
-| Grouped, HAVING, DISTINCT or UNION source queries | Refused (identity resolution not proven) |
+| Grouped, HAVING, DISTINCT, JOIN or UNION source queries, or table aliases | Refused (identity resolution not proven) |
 | Non-Eloquent data sources | Refused |
 | Multi-database transactions | Refused |
 | MySQL 8.4 / PostgreSQL 16 functional CI | Tested (parallel concurrency testing outstanding) |

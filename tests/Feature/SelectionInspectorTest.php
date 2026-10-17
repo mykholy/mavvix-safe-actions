@@ -7,6 +7,7 @@ namespace Mavvix\SafeActions\Tests\Feature;
 use Illuminate\Database\Eloquent\Model;
 use Mavvix\SafeActions\Exceptions\UnsafeSelection;
 use Mavvix\SafeActions\Selection\SelectionInspector;
+use Mavvix\SafeActions\Tests\Fixtures\GloballyJoinedProbeOrder;
 use Mavvix\SafeActions\Tests\Fixtures\ProbeOrder;
 use Mavvix\SafeActions\Tests\TestCase;
 
@@ -91,6 +92,28 @@ final class SelectionInspectorTest extends TestCase
         }
 
         self::assertSame('pending', $row->fresh()->status);
+    }
+
+    public function test_joins_and_aliased_from_queries_fail_before_record_hydration(): void
+    {
+        $record = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+
+        $scopes = [
+            ProbeOrder::query()->join('probe_orders as duplicate', 'duplicate.tenant_id', '=', 'probe_orders.tenant_id'),
+            ProbeOrder::query()->from('probe_orders as alias'),
+            GloballyJoinedProbeOrder::query(),
+        ];
+
+        foreach ($scopes as $scope) {
+            try {
+                (new SelectionInspector)->inspect($scope, [$record->getKey()], fn (): bool => true);
+                self::fail('An ambiguous row-identity query was accepted.');
+            } catch (UnsafeSelection $exception) {
+                self::assertSame('This Filament selection mode is not supported safely.', $exception->getMessage());
+            }
+        }
+
+        self::assertSame('pending', $record->fresh()->status);
     }
 
     public function test_missing_key_fails_entire_inspection(): void
