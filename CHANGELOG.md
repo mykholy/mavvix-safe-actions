@@ -16,6 +16,7 @@ All noteworthy changes will be documented here. Until the first stable release, 
 - Livewire, Testbench, security regression, PHPUnit and Laravel Pint CI coverage.
 - MySQL 8.4 and PostgreSQL 16 functional test jobs in CI.
 - Independent-process parallel ticket replay and stale-scope regression coverage for MySQL and PostgreSQL.
+- Crash recovery regression: abrupt process termination after UPDATE but before COMMIT rolls back both the row and preflight ticket on MySQL and PostgreSQL.
 - Mandatory Larastan/PHPStan level 5 CI gate with typed Eloquent preflight records.
 - Extra confirmation guard that rejects changed Livewire selection even when filters remain unchanged.
 - Pruning command for expired and consumed preflight tickets with a configurable retention period.
@@ -23,7 +24,7 @@ All noteworthy changes will be documented here. Until the first stable release, 
 
 ### Not yet complete
 
-- Independent security review, forced process-crash and broader concurrency tests.
+- Independent security review, broader lock-contention testing and scalability benchmarks.
 - Full browser UX and accessibility review.
 - Large-scale queued execution, audit history, impact diffs and rollback after successful commit.
 - Filament 4 support or a versioned stable compatibility contract.

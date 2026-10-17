@@ -146,8 +146,8 @@ Do not treat these short-lived tickets as an immutable audit trail.
 - Serializes uses of the same ticket and locks the selected rows within a transaction where supported by the database.
 - Rolls back database changes when a callback fails before commit. It **cannot** roll back external APIs, sent messages, dispatched jobs or mutations on another database connection.
 - Cannot guarantee a field-level immutable diff, full protection against all cross-process races, or rollback after a successful commit.
-- Rejects unsupported pivots and unbounded selections. Functional and two-process replay/stale-scope regression tests pass on MySQL and PostgreSQL; forced crash and broader concurrency tests are still required.
-- Still requires independent security review, forced process-failure tests, browser coverage and a supported-version matrix before v1.0.0.
+- Rejects unsupported pivots and unbounded selections. Functional and two-process replay/stale-scope regression tests pass on MySQL and PostgreSQL; abrupt pre-commit process-crash recovery tests also pass; broader concurrency and scale benchmarks remain required.
+- Still requires independent security review, browser coverage, broader lock-contention/scale benchmarks and a supported-version matrix before v1.0.0.
 
 Callbacks must be short-running, synchronous and database-only. Do not perform irreversible work from the mutation callback. Use an outbox and a separate worker if you need external effects.
 
