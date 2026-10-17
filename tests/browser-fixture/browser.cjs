@@ -138,7 +138,13 @@ const AxeBuilder = require('@axe-core/playwright').default;
         await plannedRow.locator('input[type="checkbox"]').check({ force: true });
         await page.getByRole('button', { name: /Archive with preview/i }).click();
         await page.getByText('Declared changes (read-only)').waitFor({ timeout: 15000 });
-        await page.getByText('Status: pending → archived').waitFor({ timeout: 15000 });
+        const impactField = page.getByRole('textbox', { name: 'Declared changes (read-only)' });
+        await impactField.waitFor({ timeout: 15000 });
+        const impact = await impactField.inputValue();
+
+        if (!impact.includes('Status: pending → archived')) {
+            throw new Error('The read-only impact field did not describe the declared update: ' + impact);
+        }
         await page.screenshot({ path: path.join(output, 'declared-change-preview.png'), fullPage: true });
 
         const plannedState = await (await page.request.get(base + '/safe-actions-e2e-state')).json();
