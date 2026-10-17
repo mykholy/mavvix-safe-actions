@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Mavvix\SafeActions\Exceptions\UnsafeSelection;
-use Mavvix\SafeActions\Selection\SelectionInspection;
 use Mavvix\SafeActions\Selection\ScopeShapeGuard;
+use Mavvix\SafeActions\Selection\SelectionInspection;
 
 /**
  * Describes only developer-declared scalar column updates.
