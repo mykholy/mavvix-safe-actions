@@ -13,6 +13,15 @@ const AxeBuilder = require('@axe-core/playwright').default;
     const page = await context.newPage();
     const failures = [];
 
+    // Axe must inspect the fully opened dialog, not an intermediate Alpine
+    // opacity transition that exposes the page behind it (false contrast fail).
+    const waitForModalAnimation = async () => {
+        await page.locator('.fi-modal-window').last().evaluate(async modal => {
+            await Promise.all(modal.getAnimations({ subtree: true })
+                .map(animation => animation.finished.catch(() => {})));
+        });
+    };
+
     page.on('pageerror', error => failures.push(error.message));
 
     try {
@@ -29,6 +38,7 @@ const AxeBuilder = require('@axe-core/playwright').default;
         await page.getByRole('button', { name: /Archive selected/i }).click();
 
         await page.getByText('Records to change').waitFor({ timeout: 15000 });
+        await waitForModalAnimation();
         await page.screenshot({ path: path.join(output, 'desktop-confirmation.png'), fullPage: true });
 
         const desktopAudit = await new AxeBuilder({ page })
@@ -71,10 +81,12 @@ const AxeBuilder = require('@axe-core/playwright').default;
         await secondRow.locator('input[type="checkbox"]').check({ force: true });
         await page.getByRole('button', { name: /Archive selected/i }).click();
         await page.getByText('تأكيد التغييرات').waitFor({ timeout: 15000 });
+        await waitForModalAnimation();
         await page.screenshot({ path: path.join(output, 'arabic-confirmation.png'), fullPage: true });
 
         await page.setViewportSize({ width: 390, height: 844 });
         await page.emulateMedia({ colorScheme: 'dark' });
+        await page.waitForTimeout(350);
         await page.screenshot({ path: path.join(output, 'mobile-dark-confirmation.png'), fullPage: true });
 
         const mobileAudit = await new AxeBuilder({ page })
