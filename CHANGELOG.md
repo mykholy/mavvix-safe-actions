@@ -6,6 +6,9 @@ All noteworthy changes will be documented here. Until the first stable release, 
 
 ### Changed
 
+- Built-in identity, timestamp and common tenant/ownership field protections cannot be disabled by overriding the declarative update configuration.
+- Added a dedicated multi-process concurrency suite on real MySQL/PostgreSQL for competing confirmations and isolated tenant scopes, with JSONL diagnostic artifacts; not a production SLO.
+
 - Removed unsupported Laravel 11 and Testbench 9 from the Composer compatibility constraints; Laravel 11 security maintenance ended March 12, 2026.
 
 ### Added
