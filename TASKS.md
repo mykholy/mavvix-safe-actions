@@ -25,7 +25,8 @@
 - [x] Sequential duplicate-submission, stale-scope, revoked-policy and rollback tests
 - [x] Two-process duplicate confirmation, stale-scope, and same-scope row-state regression tests on MySQL and PostgreSQL
 - [x] Abrupt worker exit after UPDATE/before COMMIT rolls back record and ticket on MySQL/PostgreSQL
-- [ ] Additional contention scenarios, lock timeouts and scale benchmarks
+- [x] Real database two-process lock-timeout regression with ticket preservation and localized error (MySQL/PostgreSQL)
+- [ ] Broader deadlock, cancellation and scale benchmarks
 - [x] CI test matrix on SQLite, MySQL 8.4 and PostgreSQL 16
 - [x] Larastan/PHPStan level 5 analysis on CI without suppression baseline
 - [x] Native modal and exception translations in English and Arabic

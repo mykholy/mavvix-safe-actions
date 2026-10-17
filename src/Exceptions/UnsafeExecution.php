@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mavvix\SafeActions\Exceptions;
 
 use RuntimeException;
+use Throwable;
 
 final class UnsafeExecution extends RuntimeException
 {
@@ -36,6 +37,11 @@ final class UnsafeExecution extends RuntimeException
     public static function selectionChanged(): self
     {
         return new self(LocalizableError::message('selection_changed', 'The selected records changed after the preflight. Start a new preview.'));
+    }
+
+    public static function databaseBusy(Throwable $cause): self
+    {
+        return new self(LocalizableError::message('database_busy', 'Records are temporarily locked by another operation. This action did not commit; start a new preview.'), 0, $cause);
     }
 
     public static function connectionMismatch(): self

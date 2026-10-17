@@ -55,7 +55,7 @@ final class ConcurrentExecutionTest extends TestCase
      * @param  array{first: string, second: string}  $tickets
      * @return array{first: string, second: string}
      */
-    private function runCompetingConfirmations(array $tickets, bool $preserveScope = false): array
+    private function runCompetingConfirmations(array $tickets, bool $preserveScope = false, bool $forceLockTimeout = false): array
     {
         $dir = sys_get_temp_dir().'/mavvix-safe-actions-'.bin2hex(random_bytes(12));
 
@@ -74,7 +74,7 @@ final class ConcurrentExecutionTest extends TestCase
                 }
 
                 if ($pid === 0) {
-                    $this->runChild($name, $tickets[$name], $dir, $preserveScope);
+                    $this->runChild($name, $tickets[$name], $dir, $preserveScope, $forceLockTimeout);
                 }
 
                 $children[$name] = $pid;
@@ -111,7 +111,7 @@ final class ConcurrentExecutionTest extends TestCase
         }
     }
 
-    private function runChild(string $name, string $ticket, string $dir, bool $preserveScope): never
+    private function runChild(string $name, string $ticket, string $dir, bool $preserveScope, bool $forceLockTimeout): never
     {
         // The fork inherits the parent's PDO socket. Never share it between
         // processes; force a separate physical connection before any queries.
@@ -120,6 +120,15 @@ final class ConcurrentExecutionTest extends TestCase
         try {
             if ($name === 'second') {
                 self::waitForFile($dir.'/first.inside');
+
+                if ($forceLockTimeout) {
+                    if (DB::connection()->getDriverName() === 'mysql') {
+                        DB::statement('SET SESSION innodb_lock_wait_timeout = 1');
+                    } else {
+                        DB::statement("SET lock_timeout = '1000ms'");
+                    }
+                }
+
                 file_put_contents($dir.'/second.started', '1');
             }
 
@@ -128,13 +137,13 @@ final class ConcurrentExecutionTest extends TestCase
                 $this->context(),
                 ProbeOrder::query()->where('tenant_id', 1)->where('status', 'pending'),
                 fn (Model $record): bool => $record->status === 'pending',
-                function (Model $record) use ($dir, $name, $preserveScope): void {
+                function (Model $record) use ($dir, $name, $preserveScope, $forceLockTimeout): void {
                     if ($name === 'first') {
                         // First transaction holds both its ticket and row locks
                         // while the competing connection starts a confirmation.
                         file_put_contents($dir.'/first.inside', '1');
                         self::waitForFile($dir.'/second.started');
-                        usleep(400_000);
+                        usleep($forceLockTimeout ? 2_200_000 : 400_000);
                     }
 
                     if ($preserveScope && $name === 'first') {
@@ -237,6 +246,24 @@ final class ConcurrentExecutionTest extends TestCase
         self::assertSame('success', $outcomes['first']);
         self::assertSame(UnsafeExecution::class, $outcomes['second']);
         self::assertSame('pending', $order->fresh()->status);
+        self::assertNotNull(SafeActionPreflight::findOrFail($firstTicket)->consumed_at);
+        self::assertNull(SafeActionPreflight::findOrFail($secondTicket)->consumed_at);
+    }
+
+    public function test_record_lock_timeout_aborts_only_the_competing_ticket(): void
+    {
+        $order = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+        $firstTicket = $this->preview($order);
+        $secondTicket = $this->preview($order);
+
+        $outcomes = $this->runCompetingConfirmations(
+            ['first' => $firstTicket, 'second' => $secondTicket],
+            forceLockTimeout: true,
+        );
+
+        self::assertSame('success', $outcomes['first']);
+        self::assertSame(UnsafeExecution::class, $outcomes['second']);
+        self::assertSame('archived', $order->fresh()->status);
         self::assertNotNull(SafeActionPreflight::findOrFail($firstTicket)->consumed_at);
         self::assertNull(SafeActionPreflight::findOrFail($secondTicket)->consumed_at);
     }
