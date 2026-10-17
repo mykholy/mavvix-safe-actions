@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Mavvix\SafeActions\Preflight;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Mavvix\SafeActions\Exceptions\UnsafeSelection;
@@ -19,7 +18,7 @@ use Mavvix\SafeActions\Selection\SelectionInspection;
 final class DeclaredChangePreview
 {
     /**
-     * @param array<string, scalar|null> $changes
+     * @param  array<array-key, mixed>  $changes
      */
     public static function validate(array $changes): void
     {
@@ -69,7 +68,7 @@ final class DeclaredChangePreview
             $before = [];
 
             foreach ($records as $record) {
-                if (! $record instanceof Model || ! array_key_exists($field, $record->getAttributes()) ||
+                if (! array_key_exists($field, $record->getAttributes()) ||
                     in_array($field, $record->getHidden(), true)) {
                     throw new InvalidArgumentException('A declared preview field must be a visible existing model column.');
                 }
