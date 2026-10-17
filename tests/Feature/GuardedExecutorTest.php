@@ -228,6 +228,83 @@ final class GuardedExecutorTest extends TestCase
         }
     }
 
+    public function test_changed_row_state_blocks_an_otherwise_authorized_same_scope_update(): void
+    {
+        $one = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+        $two = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+        $scope = $this->scope(false);
+        $id = $this->issue([$one->getKey(), $two->getKey()], $scope);
+
+        // IDs, tenant scope and authorization are still identical.
+        $two->update(['status' => 'reviewing']);
+        $mutations = 0;
+
+        try {
+            $this->executor()->execute(
+                $id,
+                $this->context(),
+                $this->scope(false),
+                fn (): bool => true,
+                function (Model $record) use (&$mutations): void {
+                    $mutations++;
+                    $this->mutate($record);
+                },
+            );
+            self::fail('A modified row must not be changed using an older preview.');
+        } catch (UnsafeExecution $exception) {
+            self::assertSame('One or more selected records changed since preview. Start a new preview.', $exception->getMessage());
+        }
+
+        self::assertSame(0, $mutations);
+        self::assertSame('pending', $one->fresh()->status);
+        self::assertSame('reviewing', $two->fresh()->status);
+        self::assertNull(SafeActionPreflight::findOrFail($id)->consumed_at);
+    }
+
+    public function test_pre_upgrade_ticket_without_record_state_digest_fails_closed(): void
+    {
+        $order = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+        $id = $this->issue([$order->getKey()]);
+
+        SafeActionPreflight::query()->whereKey($id)->update(['record_state_digest' => null]);
+
+        try {
+            $this->executor()->execute(
+                $id,
+                $this->context(),
+                $this->scope(),
+                fn (): bool => true,
+                fn (Model $record) => $this->mutate($record),
+            );
+            self::fail('A ticket without a record-state fingerprint must not execute.');
+        } catch (UnsafeExecution $exception) {
+            self::assertSame('This older preflight has no record-state snapshot. Start a new preview.', $exception->getMessage());
+        }
+
+        self::assertSame('pending', $order->fresh()->status);
+        self::assertNull(SafeActionPreflight::findOrFail($id)->consumed_at);
+    }
+
+    public function test_projection_still_protects_non_projected_model_columns(): void
+    {
+        $order = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+        $scope = $this->scope(false)->select(['id', 'status']);
+        $id = $this->issue([$order->getKey()], $scope);
+
+        // tenant_id is not in the host query's explicit projection.
+        $order->update(['tenant_id' => 2]);
+
+        $this->expectException(UnsafeSelection::class);
+
+        $this->executor()->execute(
+            $id,
+            $this->context(),
+            $this->scope(false)->select(['id', 'status']),
+            fn (): bool => true,
+            fn (Model $record) => $this->mutate($record),
+        );
+    }
+
     public function test_ticket_with_modified_selection_is_rejected(): void
     {
         $order = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);

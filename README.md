@@ -8,9 +8,9 @@
 
 1. Evaluate the current Filament table selection against the live filtered and tenant-scoped Eloquent query.
 2. Reject missing, stale, out-of-scope, unselectable or unauthorized records.
-3. Persist an expiring ticket bound to the actor, guard, tenant, panel, action and query fingerprint.
+3. Persist an expiring ticket bound to the actor, guard, tenant, panel, action, query fingerprint and selected model state.
 4. Show the verified record count in a native Filament confirmation modal.
-5. Re-resolve and lock the selected records, check policies again, perform a single-database transaction, and consume the ticket.
+5. Re-resolve and lock the selected records, recheck policy and their persisted values, perform a single-database transaction, and consume the ticket.
 
 The ticket can be used successfully only once. A failure aborts the transaction without consuming it.
 
@@ -151,7 +151,7 @@ directory. These translations only change presentation, never authorization.
 
 ## Ticket retention
 
-Preflight tickets are short-lived, but their database rows are kept until pruned.
+Preflight tickets are short-lived, but their database rows are kept until pruned. On upgrading an earlier pre-alpha installation, publish and run the latest migrations: old outstanding tickets without a record-state fingerprint deliberately cannot execute and must be previewed again.
 Schedule the built-in command in your Laravel application to prevent unbounded growth:
 
 ~~~bash
@@ -166,7 +166,7 @@ Do not treat these short-lived tickets as an immutable audit trail.
 
 ## Guarantees and limitations
 
-- Revalidates selection identity, filtered query, actor/tenant context and per-record eligibility at execution.
+- Revalidates selection identity, filtered query, actor/tenant context, per-record eligibility and persisted model values at execution. Any selected record changed since preview requires a new ticket, even when the query and IDs are unchanged.
 - Serializes uses of the same ticket and locks the selected rows within a transaction where supported by the database.
 - Rolls back database changes when a callback fails before commit. It **cannot** roll back external APIs, sent messages, dispatched jobs or mutations on another database connection.
 - Cannot guarantee a field-level immutable diff, full protection against all cross-process races, or rollback after a successful commit.

@@ -10,6 +10,7 @@ use Mavvix\SafeActions\Exceptions\UnsafeExecution;
 use Mavvix\SafeActions\Exceptions\UnsafeSelection;
 use Mavvix\SafeActions\Preflight\PreflightContext;
 use Mavvix\SafeActions\Preflight\PreflightStore;
+use Mavvix\SafeActions\Preflight\RecordStateFingerprint;
 use Mavvix\SafeActions\Preflight\SafeActionPreflight;
 use Mavvix\SafeActions\Preflight\ScopeFingerprint;
 use Mavvix\SafeActions\Selection\ExplicitKeys;
@@ -88,6 +89,7 @@ final class GuardedExecutor
             // Re-read and lock the actual rows, not objects cached during preview.
             $records = (clone $permittedScope)
                 ->whereKey($requested->keys)
+                ->addSelect($model->qualifyColumn('*'))
                 ->orderBy($model->getQualifiedKeyName())
                 ->lockForUpdate()
                 ->get();
@@ -111,6 +113,14 @@ final class GuardedExecutor
                 if (! $authorize($record)) {
                     throw UnsafeSelection::unauthorized();
                 }
+            }
+
+            if ($ticket->record_state_digest === null) {
+                throw UnsafeExecution::stateUnbound();
+            }
+
+            if (! hash_equals($ticket->record_state_digest, (new RecordStateFingerprint)->forRecords($records))) {
+                throw UnsafeExecution::recordChanged();
             }
 
             foreach ($records as $record) {

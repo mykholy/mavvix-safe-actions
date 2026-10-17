@@ -26,6 +26,8 @@ return [
         'unbound' => 'This preflight was not bound to a resource query and cannot be executed.',
         'scope_changed' => 'The permitted query changed after the preflight. Start a new preview.',
         'selection_changed' => 'The selected records changed after the preflight. Start a new preview.',
+        'state_unbound' => 'This older preflight has no record-state snapshot. Start a new preview.',
+        'record_changed' => 'One or more selected records changed since preview. Start a new preview.',
         'connection_mismatch' => 'Preflight and selected records must use the same database connection.',
         'unsupported_scope' => 'A paginated or limited query cannot safely execute this selection.',
     ],
