@@ -1,8 +1,31 @@
 # Mavvix Safe Actions
 
-**Fail-closed bulk changes for Filament 5.** Resolve the exact selection, preview its size, revalidate at confirmation, and mutate records within a single database transaction.
+[![Tests](https://github.com/mykholy/mavvix-safe-actions/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/mykholy/mavvix-safe-actions/actions/workflows/tests.yml)
+[![Browser E2E](https://github.com/mykholy/mavvix-safe-actions/actions/workflows/browser-e2e.yml/badge.svg?branch=main)](https://github.com/mykholy/mavvix-safe-actions/actions/workflows/browser-e2e.yml)
+[![Latest GitHub Release](https://img.shields.io/github/v/release/mykholy/mavvix-safe-actions?label=release)](https://github.com/mykholy/mavvix-safe-actions/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![PHP](https://img.shields.io/badge/PHP-%5E8.2-777bb4)](composer.json)
+[![Filament](https://img.shields.io/badge/Filament-5-orange)](https://filamentphp.com/)
 
-> **v1.0.0 stable SemVer API (GitHub release).** This is a narrowly scoped Eloquent/Filament 5 integration, not an independent security certification. Read the [first-party security review](docs/security-review-v1.0.0.md) and verify the [GitHub release](https://github.com/mykholy/mavvix-safe-actions/releases/tag/v1.0.0) before deploying. Automated release publication requires five green same-commit workflows. Human assistive-tech, external security review and production-shaped performance assurance remain outstanding.
+**Fail-closed bulk actions for Filament 5.** Preview the **exact selected record count**, verify authorization and tenant-scoped selection again on confirmation, then apply database-only mutations in one transaction.
+
+[Installation](#installation) · [Usage](#native-filament-action) · [Security model](docs/security-model.md) · [Compatibility](#compatibility) · [Releases](https://github.com/mykholy/mavvix-safe-actions/releases/latest) · [Contributing](CONTRIBUTING.md)
+
+> **Stable, narrowly scoped API — not a security certification.** Production integrations must supply their own trusted tenant query, policies and side-effect-safe callbacks. Automated MySQL/PostgreSQL and browser tests have passed; an independent security audit, human screen-reader review and production-shaped load qualification remain outstanding. See the [first-party security assessment](docs/security-review-v1.0.0.md) and [security policy](SECURITY.md).
+
+## Why Safe Actions?
+
+Filament can show a selection that becomes stale or no longer matches a filtered query before the user confirms a bulk change. Safe Actions treats the original selection as **untrusted input** and refuses to proceed when its exact identity or authorization cannot be re-established.
+
+| Without an explicit safety boundary | With Mavvix Safe Actions |
+| --- | --- |
+| The UI selection can become stale | Selected IDs, filter scope and persisted row state are checked again |
+| A now-unauthorized row can be reached | Every selected row is re-authorized before any mutation |
+| Repeated confirmation can cause duplicate work | A short-lived ticket is consumed once in the database transaction |
+| Partial database updates can be committed | Supported same-connection changes share a transaction and row locks |
+| Large “select all” operations can expand unexpectedly | A 500-record default cap fails closed rather than truncating |
+
+**Important:** The package cannot make an unsafe host query, callback, model observer, external API call or cross-database operation safe automatically.
 
 ## How it works
 
@@ -32,9 +55,11 @@ The ticket can be used successfully only once. A failure aborts the transaction 
 
 Selections are capped at **500 records** by default. For inverse (all-matching except explicitly deselected IDs) selection, the exclusion is applied to the filtered, tenant-scoped SQL query **before** checking the cap. Larger resulting selections still fail closed; this package does not silently truncate execution.
 
-## Install v1.0.0
+## Installation
 
-The GitHub tag is the authoritative release. Until the package is independently listed on Packagist, add the repository as a Composer VCS source in your Filament 5 application:
+Once [Packagist indexing](https://packagist.org/packages/mykholy/mavvix-safe-actions) is confirmed, run `composer require mykholy/mavvix-safe-actions:^1.0`.
+
+**Before Packagist indexing**, use the official versioned GitHub repository as a Composer VCS source in your Filament 5 Laravel app:
 
 ~~~bash
 composer config repositories.mavvix vcs https://github.com/mykholy/mavvix-safe-actions
@@ -43,7 +68,9 @@ php artisan vendor:publish --tag=safe-actions-migrations
 php artisan migrate
 ~~~
 
-Once Packagist indexing is verified, the VCS configuration is unnecessary. Never substitute `dev-main` for a production pinned release. Run `composer validate --strict`, `vendor/bin/phpunit`, and `vendor/bin/pint --test` in a clone when contributing.
+Once Packagist indexing is verified, the VCS configuration is unnecessary. Pin the stable `^1.0` release instead of `dev-main`. Publish migrations and run `php artisan migrate` before using the action. The package registers its Laravel service provider automatically.
+
+For maintainers preparing public listings, see the [Packagist submission checklist](docs/packagist-submission.md) and [Filament plugin directory copy](docs/filament-plugin-listing.md).
 
 ## Native Filament action
 
@@ -187,13 +214,13 @@ Do not treat these short-lived tickets as an immutable audit trail.
 - Suppresses Eloquent `retrieved` observers for package-owned read-only queries, but does not suppress mutation lifecycle events. Host authorization callbacks and Filament's own table hydration remain under host-application control.
 - Cannot guarantee a field-level immutable diff, full protection against all cross-process races, or rollback after a successful commit.
 - Rejects unsupported pivots and unbounded selections. Functional and two-process replay/stale-scope regression tests pass on MySQL and PostgreSQL; abrupt pre-commit process-crash recovery tests also pass. A small independent-PDO multi-worker contention suite exercises 4/8 confirmations across 100/500 rows, including competing and isolated tenants. These synthetic cases are not a production-scale workload; broader real-world capacity qualification remains required.
-- Automated Chromium end-to-end coverage, keyboard focus and Escape cancellation, and axe-core scanning have passed, but **human screen-reader/accessibility review** and **independent security review** are outstanding, as is production-like concurrent load qualification before v1.0.0.
+- Automated Chromium end-to-end coverage, keyboard focus and Escape cancellation, and axe-core scanning have passed; **human screen-reader/accessibility review**, **independent security review** and production-like concurrent load qualification remain outstanding despite the stable SemVer API.
 
 Callbacks must be short-running, synchronous and database-only. Do not perform irreversible work from the mutation callback. Use an outbox and a separate worker if you need external effects.
 
 ## Documentation and development
 
-[Implementation plan](IMPLEMENTATION_PLAN.md) · [Release playbook](docs/release-playbook.md) · [Compatibility verification](docs/compatibility-verification.md) · [Task board](TASKS.md) · [Selection compatibility](docs/selection-compatibility.md) · [Security model](docs/security-model.md) · [Measured CI benchmarks](docs/benchmark-results-2026-10-17.md) · [First-party security review](docs/security-review-v1.0.0.md) · [v1.0.0 release notes](docs/releases/v1.0.0.md) · [Release review packet](docs/release-candidate-review-packet-2026-10-18.md) · [Release readiness](docs/release-readiness-2026-10-17.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [CI](.github/workflows/tests.yml)
+[Packagist submission](docs/packagist-submission.md) · [Filament listing](docs/filament-plugin-listing.md) · [Implementation plan](IMPLEMENTATION_PLAN.md) · [Release playbook](docs/release-playbook.md) · [Compatibility verification](docs/compatibility-verification.md) · [Task board](TASKS.md) · [Selection compatibility](docs/selection-compatibility.md) · [Security model](docs/security-model.md) · [Measured CI benchmarks](docs/benchmark-results-2026-10-17.md) · [First-party security review](docs/security-review-v1.0.0.md) · [v1.0.0 release notes](docs/releases/v1.0.0.md) · [Release review packet](docs/release-candidate-review-packet-2026-10-18.md) · [Release readiness](docs/release-readiness-2026-10-17.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [CI](.github/workflows/tests.yml)
 
 To report a vulnerability, use a private GitHub Security Advisory if available. Do not publish exploit details in a public issue.
 
