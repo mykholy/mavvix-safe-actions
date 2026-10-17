@@ -1,4 +1,6 @@
-# Mavvix Safe Actions — release readiness
+# Mavvix Safe Actions — historical release readiness snapshot
+
+> **Historical evidence as of October 17, 2026.** The repository later published a narrowly scoped v1.0.0 stable SemVer API with explicit first-party-only security review. Read the [current README](../README.md), [GitHub releases](https://github.com/mykholy/mavvix-safe-actions/releases/latest) and [recorded security assessment](security-review-v1.0.0.md). Remaining independent audit and accessibility checks are still not complete. The pre-release NO-GO decision below is retained as historical context.
 
 **Reviewed:** October 17, 2026.  
 **Status: pre-alpha / release candidate preparation.** Green automated tests do **not** establish independent security or production safety, and no stable release or Packagist listing is claimed.
