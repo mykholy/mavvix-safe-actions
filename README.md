@@ -18,9 +18,9 @@ The ticket can be used successfully only once. A failure aborts the transaction 
 
 | Runtime / mode | Status |
 | --- | --- |
-| Filament 5 + Laravel 12 / PHP 8.3 | CI tested |
+| Filament 5 + Laravel 12 / PHP 8.3 | CI tested; Laravel 12 security support through February 24, 2027 |
 | Filament 5 + Laravel 13 / PHP 8.4 | CI tested |
-| Laravel 11 | Not yet validated against secure framework versions |
+| Laravel 11 | Not supported (upstream security support ended March 12, 2026) |
 | Filament 3 / 4 | Not supported |
 | Eloquent tables with single-column primary keys | Supported |
 | Filtered, current-page and bounded all-matching selections | Livewire tests |
