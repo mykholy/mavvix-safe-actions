@@ -19,6 +19,8 @@ final class SelectionInspector
      */
     public function inspect(Builder $permittedScope, array $selectedKeys, callable $mayAct, int $limit = 500): SelectionInspection
     {
+        ScopeShapeGuard::assertSupported($permittedScope);
+
         $model = $permittedScope->getModel();
         $requested = ExplicitKeys::forModel($model, $selectedKeys, $limit);
 

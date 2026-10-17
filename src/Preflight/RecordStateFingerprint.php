@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use JsonException;
 use Mavvix\SafeActions\Exceptions\UnsafeSelection;
 use Mavvix\SafeActions\Selection\ExplicitKeys;
+use Mavvix\SafeActions\Selection\ScopeShapeGuard;
 use Mavvix\SafeActions\Selection\SelectionInspection;
 
 /**
@@ -19,6 +20,8 @@ final class RecordStateFingerprint
 {
     public function forScope(Builder $scope, SelectionInspection $inspection): string
     {
+        ScopeShapeGuard::assertSupported($scope);
+
         $query = $scope->getQuery();
 
         if ($query->limit !== null || $query->offset !== null) {

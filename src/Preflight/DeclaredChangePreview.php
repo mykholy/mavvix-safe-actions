@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Mavvix\SafeActions\Exceptions\UnsafeSelection;
 use Mavvix\SafeActions\Selection\SelectionInspection;
+use Mavvix\SafeActions\Selection\ScopeShapeGuard;
 
 /**
  * Describes only developer-declared scalar column updates.
@@ -45,6 +46,7 @@ final class DeclaredChangePreview
     public function summarize(Builder $scope, SelectionInspection $inspection, array $changes): string
     {
         self::validate($changes);
+        ScopeShapeGuard::assertSupported($scope);
 
         $model = $scope->getModel();
 

@@ -31,6 +31,33 @@ final class FilamentGuardedSelectionTest extends TestCase
             ->assertSet('inspectionError', 'Some selected records are not available within the permitted scope.');
     }
 
+    public function test_global_search_cannot_be_escaped_by_explicit_selection(): void
+    {
+        ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+        $archived = ProbeOrder::create(['tenant_id' => 1, 'status' => 'archived']);
+
+        Livewire::test(GuardedOrdersTable::class)
+            ->set('tableSearch', 'pending')
+            ->set('selectedTableRecords', [$archived->getKey()])
+            ->call('inspectSelection')
+            ->assertSet('inspectedCount', null)
+            ->assertSet('inspectionError', 'Some selected records are not available within the permitted scope.');
+    }
+
+    public function test_global_search_restricts_bounded_all_matching_selection(): void
+    {
+        ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
+        ProbeOrder::create(['tenant_id' => 1, 'status' => 'archived']);
+        ProbeOrder::create(['tenant_id' => 2, 'status' => 'pending']);
+
+        Livewire::test(GuardedOrdersTable::class)
+            ->set('tableSearch', 'pending')
+            ->set('isTrackingDeselectedTableRecords', true)
+            ->call('inspectSelection')
+            ->assertSet('inspectedCount', 1)
+            ->assertSet('inspectionError', null);
+    }
+
     public function test_filter_cannot_be_escaped_by_explicit_selection(): void
     {
         $pending = ProbeOrder::create(['tenant_id' => 1, 'status' => 'pending']);
