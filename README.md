@@ -1,5 +1,13 @@
 # Mavvix Safe Actions
 
+<p align="center">
+  <img src="docs/assets/mavvix-safe-actions-hero.webp" alt="Mavvix Safe Actions concept illustration: a guarded Filament table, verified selection, tenant-aware preflight and transaction-bound bulk confirmation." width="100%">
+</p>
+
+<p align="center">
+  <sub>Product illustration — not an application screenshot or a copyable code example. For real integration code, see the examples below.</sub>
+</p>
+
 [![Tests](https://github.com/mykholy/mavvix-safe-actions/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/mykholy/mavvix-safe-actions/actions/workflows/tests.yml)
 [![Browser E2E](https://github.com/mykholy/mavvix-safe-actions/actions/workflows/browser-e2e.yml/badge.svg?branch=main)](https://github.com/mykholy/mavvix-safe-actions/actions/workflows/browser-e2e.yml)
 [![Latest GitHub Release](https://img.shields.io/github/v/release/mykholy/mavvix-safe-actions?label=release)](https://github.com/mykholy/mavvix-safe-actions/releases/latest)
@@ -7,11 +15,35 @@
 [![PHP](https://img.shields.io/badge/PHP-%5E8.2-777bb4)](composer.json)
 [![Filament](https://img.shields.io/badge/Filament-5-orange)](https://filamentphp.com/)
 
-**Fail-closed bulk actions for Filament 5.** Preview the **exact selected record count**, verify authorization and tenant-scoped selection again on confirmation, then apply database-only mutations in one transaction.
+**Fail-closed bulk actions for Filament 5.** Inspect the exact selection, show a bounded confirmation preview, re-check actor/tenant scope and permissions, then execute database-only changes in one transaction. **No silent truncation; no implicit authorization bypass.**
 
-[Installation](#installation) · [Usage](#native-filament-action) · [Security model](docs/security-model.md) · [Compatibility](#compatibility) · [Releases](https://github.com/mykholy/mavvix-safe-actions/releases/latest) · [Contributing](CONTRIBUTING.md)
+[Install](#installation) · [Code example](#native-filament-action) · [Declared preview](#read-only-declared-change-preview) · [Support matrix](#compatibility) · [Security](docs/security-model.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
 
 > **Stable, narrowly scoped API — not a security certification.** Production integrations must supply their own trusted tenant query, policies and side-effect-safe callbacks. Automated MySQL/PostgreSQL and browser tests have passed; an independent security audit, human screen-reader review and production-shaped load qualification remain outstanding. See the [first-party security assessment](docs/security-review-v1.0.0.md) and [security policy](SECURITY.md).
+
+## Installation
+
+If [Packagist](https://packagist.org/packages/mykholy/mavvix-safe-actions) lists the package and its stable version, install with:
+
+```bash
+composer require 'mykholy/mavvix-safe-actions:^1.0'
+php artisan vendor:publish --tag=safe-actions-migrations
+php artisan migrate
+```
+
+**Before Packagist indexing**, use the official versioned GitHub repository as a Composer VCS source in your Filament 5 Laravel app:
+
+~~~bash
+composer config repositories.mavvix vcs https://github.com/mykholy/mavvix-safe-actions
+composer require "mykholy/mavvix-safe-actions:^1.0"
+php artisan vendor:publish --tag=safe-actions-migrations
+php artisan migrate
+~~~
+
+Once Packagist indexing is verified, the VCS configuration is unnecessary. Pin the stable `^1.0` release instead of `dev-main`. Publish migrations and run `php artisan migrate` before using the action. The package registers its Laravel service provider automatically.
+
+For maintainers preparing public listings, see the [Packagist submission checklist](docs/packagist-submission.md) and [Filament plugin directory copy](docs/filament-plugin-listing.md).
+
 
 ## Why Safe Actions?
 
@@ -55,22 +87,17 @@ The ticket can be used successfully only once. A failure aborts the transaction 
 
 Selections are capped at **500 records** by default. For inverse (all-matching except explicitly deselected IDs) selection, the exclusion is applied to the filtered, tenant-scoped SQL query **before** checking the cap. Larger resulting selections still fail closed; this package does not silently truncate execution.
 
-## Installation
+## What the package actually protects
 
-Once [Packagist indexing](https://packagist.org/packages/mykholy/mavvix-safe-actions) is confirmed, run `composer require mykholy/mavvix-safe-actions:^1.0`.
+| Guard | How it works |
+| --- | --- |
+| **Exact record set** | Resolves Eloquent primary keys from the current filtered, tenant-scoped table query; refuses mismatches |
+| **Bounded preview** | Shows the verified row count and optionally a developer-declared field change summary (not a guaranteed complete diff) |
+| **Fresh authorization** | Re-checks selected rows and the application's record policy on confirmation |
+| **One-use preflight** | Persists a short-lived ticket bound to the actor, guard, panel, tenant, action and selected state |
+| **Single-database transaction** | Locks selected records where supported, executes the supplied database-only mutation, and consumes its ticket atomically |
 
-**Before Packagist indexing**, use the official versioned GitHub repository as a Composer VCS source in your Filament 5 Laravel app:
-
-~~~bash
-composer config repositories.mavvix vcs https://github.com/mykholy/mavvix-safe-actions
-composer require "mykholy/mavvix-safe-actions:^1.0"
-php artisan vendor:publish --tag=safe-actions-migrations
-php artisan migrate
-~~~
-
-Once Packagist indexing is verified, the VCS configuration is unnecessary. Pin the stable `^1.0` release instead of `dev-main`. Publish migrations and run `php artisan migrate` before using the action. The package registers its Laravel service provider automatically.
-
-For maintainers preparing public listings, see the [Packagist submission checklist](docs/packagist-submission.md) and [Filament plugin directory copy](docs/filament-plugin-listing.md).
+**Supported boundary:** Laravel 12/13, Filament 5, Eloquent tables with single-column primary keys, one database connection, and up to **500 selected records by default**. The application must provide the **correct tenant-scoped query**, trusted identity and authorization logic. External I/O and callbacks with irreversible side effects are not transactionally protected. See [limitations](#guarantees-and-limitations).
 
 ## Native Filament action
 
@@ -217,6 +244,17 @@ Do not treat these short-lived tickets as an immutable audit trail.
 - Automated Chromium end-to-end coverage, keyboard focus and Escape cancellation, and axe-core scanning have passed; **human screen-reader/accessibility review**, **independent security review** and production-like concurrent load qualification remain outstanding despite the stable SemVer API.
 
 Callbacks must be short-running, synchronous and database-only. Do not perform irreversible work from the mutation callback. Use an outbox and a separate worker if you need external effects.
+
+## Tests and verification
+
+The project runs a [PHP/Laravel matrix](.github/workflows/tests.yml), [Chromium browser scenarios](.github/workflows/browser-e2e.yml), [static analysis](.github/workflows/static-analysis.yml), [Composer security audits](.github/workflows/dependency-audit.yml) and [fresh host installations](.github/workflows/host-installation.yml). The MySQL and PostgreSQL jobs cover replay, stale scopes, rollback and synthetic multi-worker contention. These tests are useful engineering evidence, **not** independent security certification or a production latency SLO.
+
+```bash
+composer validate --strict
+vendor/bin/phpunit
+vendor/bin/pint --test
+vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+```
 
 ## Documentation and development
 
