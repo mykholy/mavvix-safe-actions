@@ -2,8 +2,9 @@
 
 **Review date:** 2026-10-18 (Africa/Cairo)  
 **Reviewed code baseline:** `be676e64ecac60d0e309f71e9edd716a2406f37c`  
-**Assessment type:** manual source inspection performed by OpenAI ChatGPT (GPT-6) plus previously recorded automated tests and repository CI.  
-**Independence:** **NOT INDEPENDENT.** The assistant participated in implementation. This signature must never be described as an external security audit, accredited penetration test, human reviewer attestation, or cryptographic signature.
+**Assessment type:** internal source-control checklist supported by recorded automated tests and repository CI; not an independent audit.  
+**Independence:** **NOT INDEPENDENT.** This document is project-maintained evidence, not an external security audit, accredited penetration test, human reviewer attestation, or cryptographic signature.
+**Documentation revision:** 2026-10-19. Published release tags retain their original immutable documentation.
 
 ## Review scope and conclusions
 
@@ -52,7 +53,5 @@ All five workflows completed successfully on baseline SHA. **The v1.0.0 tag must
 
 **First-party review outcome:** No reproduced blocker from the inspected source and recorded CI within the supported narrow contract. Proceed with an **explicitly maintainer-directed, scoped v1.0.0 release** only if the exact final main commit passes all five CI workflows. Preserve the outstanding issues and caveats; do not advertise the release as independently security-certified or fully production-qualified.
 
-**Reviewed and signed by:** /s/ **ChatGPT (GPT-6), automated first-party code/security reviewer**  
-**Signed on:** 2026-10-18  
-**Signature type:** textual provenance statement, **not cryptographic** and **not a human signature**.  
-**Release authorization:** project owner explicitly directed creation of a stable tag in conversation; this statement does not impersonate the owner's handwritten or cryptographic signature.
+**Independent sign-off:** Not obtained. No individual reviewer or external organization is represented as having certified the package.  
+**Release authorization:** The project maintainer directed a scoped stable release; that decision is distinct from independent security approval.
