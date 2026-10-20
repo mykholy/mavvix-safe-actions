@@ -1,29 +1,31 @@
 # Mavvix Safe Actions
 
-<p align="center">
-  <img src="docs/assets/mavvix-safe-actions-hero.webp" alt="Mavvix Safe Actions concept illustration: a guarded Filament table, verified selection, tenant-aware preflight and transaction-bound bulk confirmation." width="100%">
-</p>
+<div class="filament-hidden">
+  <p align="center">
+    <img src="https://raw.githubusercontent.com/mykholy/mavvix-safe-actions/main/docs/assets/mavvix-safe-actions-hero.webp" alt="Concept illustration of tenant-aware Filament bulk actions with preflight verification and database-only confirmation." width="100%">
+  </p>
 
-<p align="center">
-  <sub>Product illustration — not an application screenshot or a copyable code example. For real integration code, see the examples below.</sub>
-</p>
+  <p align="center">
+    <sub>Concept illustration only — for copyable code, use the actual API examples below.</sub>
+  </p>
+</div>
 
 [![Tests](https://github.com/mykholy/mavvix-safe-actions/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/mykholy/mavvix-safe-actions/actions/workflows/tests.yml)
 [![Browser E2E](https://github.com/mykholy/mavvix-safe-actions/actions/workflows/browser-e2e.yml/badge.svg?branch=main)](https://github.com/mykholy/mavvix-safe-actions/actions/workflows/browser-e2e.yml)
 [![Latest GitHub Release](https://img.shields.io/github/v/release/mykholy/mavvix-safe-actions?label=release)](https://github.com/mykholy/mavvix-safe-actions/releases/latest)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![PHP](https://img.shields.io/badge/PHP-%5E8.2-777bb4)](composer.json)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/mykholy/mavvix-safe-actions/blob/main/LICENSE)
+[![PHP](https://img.shields.io/badge/PHP-%5E8.2-777bb4)](https://github.com/mykholy/mavvix-safe-actions/blob/main/composer.json)
 [![Filament](https://img.shields.io/badge/Filament-5-orange)](https://filamentphp.com/)
 
 **Fail-closed bulk actions for Filament 5.** Inspect the exact selection, show a bounded confirmation preview, re-check actor/tenant scope and permissions, then execute database-only changes in one transaction. **No silent truncation; no implicit authorization bypass.**
 
-[Install](#installation) · [Code example](#native-filament-action) · [Declared preview](#read-only-declared-change-preview) · [Support matrix](#compatibility) · [Security](docs/security-model.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
+[Install](#installation) · [Code example](#native-filament-action) · [Declared preview](#read-only-declared-change-preview) · [Support matrix](#compatibility) · [Security](https://github.com/mykholy/mavvix-safe-actions/blob/main/docs/security-model.md) · [Changelog](https://github.com/mykholy/mavvix-safe-actions/blob/main/CHANGELOG.md) · [Contributing](https://github.com/mykholy/mavvix-safe-actions/blob/main/CONTRIBUTING.md)
 
-> **Stable, narrowly scoped API — not a security certification.** Production integrations must supply their own trusted tenant query, policies and side-effect-safe callbacks. Automated MySQL/PostgreSQL and browser tests have passed; an independent security audit, human screen-reader review and production-shaped load qualification remain outstanding. See the [first-party security assessment](docs/security-review-v1.0.0.md) and [security policy](SECURITY.md).
+> **Stable, narrowly scoped API — not a security certification.** Production integrations must supply their own trusted tenant query, policies and side-effect-safe callbacks. Automated MySQL/PostgreSQL and browser tests have passed; an independent security audit, human screen-reader review and production-shaped load qualification remain outstanding. See the [first-party security assessment](https://github.com/mykholy/mavvix-safe-actions/blob/main/docs/security-review-v1.0.0.md) and [security policy](https://github.com/mykholy/mavvix-safe-actions/blob/main/SECURITY.md).
 
 ## Installation
 
-If [Packagist](https://packagist.org/packages/mykholy/mavvix-safe-actions) lists the package and its stable version, install with:
+Install the published [Packagist package](https://packagist.org/packages/mykholy/mavvix-safe-actions) in a Laravel 12/13 application using Filament 5:
 
 ```bash
 composer require 'mykholy/mavvix-safe-actions:^1.0'
@@ -31,18 +33,9 @@ php artisan vendor:publish --tag=safe-actions-migrations
 php artisan migrate
 ```
 
-**Before Packagist indexing**, use the official versioned GitHub repository as a Composer VCS source in your Filament 5 Laravel app:
+The package registers its Laravel service provider automatically. Pin the stable `^1.0` release instead of `dev-main`, and run migrations before executing bulk actions. The host application must provide its own trusted tenant-scoped query and per-record authorization policy.
 
-~~~bash
-composer config repositories.mavvix vcs https://github.com/mykholy/mavvix-safe-actions
-composer require "mykholy/mavvix-safe-actions:^1.0"
-php artisan vendor:publish --tag=safe-actions-migrations
-php artisan migrate
-~~~
-
-Once Packagist indexing is verified, the VCS configuration is unnecessary. Pin the stable `^1.0` release instead of `dev-main`. Publish migrations and run `php artisan migrate` before using the action. The package registers its Laravel service provider automatically.
-
-For maintainers preparing public listings, see the [Packagist submission checklist](docs/packagist-submission.md) and [Filament plugin directory copy](docs/filament-plugin-listing.md).
+For maintainers preparing public listings, see the [Packagist submission checklist](https://github.com/mykholy/mavvix-safe-actions/blob/main/docs/packagist-submission.md) and [Filament plugin directory copy](https://github.com/mykholy/mavvix-safe-actions/blob/main/docs/filament-plugin-listing.md).
 
 
 ## Why Safe Actions?
@@ -247,7 +240,7 @@ Callbacks must be short-running, synchronous and database-only. Do not perform i
 
 ## Tests and verification
 
-The project runs a [PHP/Laravel matrix](.github/workflows/tests.yml), [Chromium browser scenarios](.github/workflows/browser-e2e.yml), [static analysis](.github/workflows/static-analysis.yml), [Composer security audits](.github/workflows/dependency-audit.yml) and [fresh host installations](.github/workflows/host-installation.yml). The MySQL and PostgreSQL jobs cover replay, stale scopes, rollback and synthetic multi-worker contention. These tests are useful engineering evidence, **not** independent security certification or a production latency SLO.
+The project runs a [PHP/Laravel matrix](https://github.com/mykholy/mavvix-safe-actions/blob/main/.github/workflows/tests.yml), [Chromium browser scenarios](https://github.com/mykholy/mavvix-safe-actions/blob/main/.github/workflows/browser-e2e.yml), [static analysis](https://github.com/mykholy/mavvix-safe-actions/blob/main/.github/workflows/static-analysis.yml), [Composer security audits](https://github.com/mykholy/mavvix-safe-actions/blob/main/.github/workflows/dependency-audit.yml) and [fresh host installations](https://github.com/mykholy/mavvix-safe-actions/blob/main/.github/workflows/host-installation.yml). The MySQL and PostgreSQL jobs cover replay, stale scopes, rollback and synthetic multi-worker contention. These tests are useful engineering evidence, **not** independent security certification or a production latency SLO.
 
 ```bash
 composer validate --strict
@@ -258,8 +251,8 @@ vendor/bin/phpstan analyse --no-progress --memory-limit=1G
 
 ## Documentation and development
 
-[Packagist submission](docs/packagist-submission.md) · [Filament listing](docs/filament-plugin-listing.md) · [Implementation plan](IMPLEMENTATION_PLAN.md) · [Release playbook](docs/release-playbook.md) · [Compatibility verification](docs/compatibility-verification.md) · [Task board](TASKS.md) · [Selection compatibility](docs/selection-compatibility.md) · [Security model](docs/security-model.md) · [Measured CI benchmarks](docs/benchmark-results-2026-10-17.md) · [First-party security review](docs/security-review-v1.0.0.md) · [v1.0.0 release notes](docs/releases/v1.0.0.md) · [Release review packet](docs/release-candidate-review-packet-2026-10-18.md) · [Release readiness](docs/release-readiness-2026-10-17.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [CI](.github/workflows/tests.yml)
+[Packagist submission](https://github.com/mykholy/mavvix-safe-actions/blob/main/docs/packagist-submission.md) · [Filament listing](https://github.com/mykholy/mavvix-safe-actions/blob/main/docs/filament-plugin-listing.md) · [Implementation plan](https://github.com/mykholy/mavvix-safe-actions/blob/main/IMPLEMENTATION_PLAN.md) · [Release playbook](https://github.com/mykholy/mavvix-safe-actions/blob/main/docs/release-playbook.md) · [Compatibility verification](https://github.com/mykholy/mavvix-safe-actions/blob/main/docs/compatibility-verification.md) · [Task board](https://github.com/mykholy/mavvix-safe-actions/blob/main/TASKS.md) · [Selection compatibility](https://github.com/mykholy/mavvix-safe-actions/blob/main/docs/selection-compatibility.md) · [Security model](https://github.com/mykholy/mavvix-safe-actions/blob/main/docs/security-model.md) · [Measured CI benchmarks](https://github.com/mykholy/mavvix-safe-actions/blob/main/docs/benchmark-results-2026-10-17.md) · [First-party security review](https://github.com/mykholy/mavvix-safe-actions/blob/main/docs/security-review-v1.0.0.md) · [v1.0.0 release notes](https://github.com/mykholy/mavvix-safe-actions/blob/main/docs/releases/v1.0.0.md) · [Release review packet](https://github.com/mykholy/mavvix-safe-actions/blob/main/docs/release-candidate-review-packet-2026-10-18.md) · [Release readiness](https://github.com/mykholy/mavvix-safe-actions/blob/main/docs/release-readiness-2026-10-17.md) · [Changelog](https://github.com/mykholy/mavvix-safe-actions/blob/main/CHANGELOG.md) · [Contributing](https://github.com/mykholy/mavvix-safe-actions/blob/main/CONTRIBUTING.md) · [CI](https://github.com/mykholy/mavvix-safe-actions/blob/main/.github/workflows/tests.yml)
 
 To report a vulnerability, use a private GitHub Security Advisory if available. Do not publish exploit details in a public issue.
 
-**License:** MIT — see [LICENSE](LICENSE).
+**License:** MIT — see [LICENSE](https://github.com/mykholy/mavvix-safe-actions/blob/main/LICENSE).
