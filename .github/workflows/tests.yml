@@ -20,7 +20,7 @@ jobs:
           - { php: '8.3', laravel: '^12.0', testbench: '^10.0' }
           - { php: '8.4', laravel: '^13.0', testbench: '^11.0' }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
@@ -69,7 +69,7 @@ jobs:
       DB_PASSWORD: root
       SAFE_ACTIONS_EXPECTED_DRIVER: mysql
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
@@ -130,7 +130,7 @@ jobs:
       DB_PASSWORD: postgres
       SAFE_ACTIONS_EXPECTED_DRIVER: pgsql
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
