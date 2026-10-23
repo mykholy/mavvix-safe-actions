@@ -92,12 +92,12 @@ jobs:
         env:
           SAFE_ACTIONS_CONCURRENT_REPORT: ${{ runner.temp }}/safe-actions-concurrent-mysql.jsonl
         run: vendor/bin/phpunit --filter ConcurrentLoadTest --fail-on-skipped
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: safe-actions-concurrent-mysql
           path: ${{ runner.temp }}/safe-actions-concurrent-mysql.jsonl
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: safe-actions-bench-mysql
           path: ${{ runner.temp }}/safe-actions-bench-mysql.jsonl
@@ -153,12 +153,12 @@ jobs:
         env:
           SAFE_ACTIONS_CONCURRENT_REPORT: ${{ runner.temp }}/safe-actions-concurrent-postgres.jsonl
         run: vendor/bin/phpunit --filter ConcurrentLoadTest --fail-on-skipped
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: safe-actions-concurrent-postgres
           path: ${{ runner.temp }}/safe-actions-concurrent-postgres.jsonl
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: safe-actions-bench-postgres
           path: ${{ runner.temp }}/safe-actions-bench-postgres.jsonl
